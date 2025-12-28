@@ -3,101 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flyer Generator App</title>
+    <title>Ultimate Flyer Generator</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     
     <style>
-        /* CSS GLOBAL */
-        :root { --primary: #4f46e5; --dark: #1e1e2e; --bg: #f3f4f6; --sidebar-w: 400px; }
-        * { box-sizing: border-box; }
+        /* --- CSS VARIABLES & THEME --- */
+        :root { 
+            --primary: #4f46e5; --dark: #0f172a; --bg: #f1f5f9; 
+            --sidebar-w: 420px; --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; outline: none; }
         
         body { 
-            margin: 0; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg); 
-            height: 100vh; 
-            display: flex; 
-            overflow: hidden; 
+            margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); height: 100vh; display: flex; color: #334155; overflow: hidden; 
         }
 
-        /* SIDEBAR */
+        /* --- SIDEBAR --- */
         .sidebar { 
-            width: var(--sidebar-w); 
-            background: white; 
-            padding: 25px; 
-            display: flex; 
-            flex-direction: column; 
-            border-right: 1px solid #e5e7eb; 
-            z-index: 10; 
-            box-shadow: 4px 0 15px rgba(0,0,0,0.05); 
-            height: 100vh; /* Pastikan Sidebar Full Tinggi */
+            width: var(--sidebar-w); background: white; display: flex; flex-direction: column; 
+            border-right: 1px solid var(--border); z-index: 20; 
+            box-shadow: 10px 0 30px rgba(0,0,0,0.03); height: 100vh;
         }
 
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-shrink: 0; }
-        h1 { font-size: 18px; color: var(--dark); margin: 0; font-weight: 800; }
+        .header { 
+            padding: 15px 20px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+        }
+        .app-brand h1 { font-size: 16px; margin: 0; font-weight: 800; color: var(--dark); }
+        .app-brand span { font-size: 10px; color: #64748b; letter-spacing: 0.5px; }
         
-        .badge { font-size: 10px; padding: 4px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
-        .badge-user { background: #e0e7ff; color: var(--primary); }
+        .badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 700; }
+        .badge-user { background: #e0f2fe; color: #0284c7; }
         .badge-admin { background: #dcfce7; color: #166534; }
 
-        /* PANEL ADMIN */
-        #admin-panel { 
-            display: none; 
-            flex: 1; 
-            flex-direction: column; 
-            height: 100%; /* Pastikan panel memenuhi sisa ruang */
-            overflow: hidden; /* Mencegah scroll ganda */
+        /* --- PANELS --- */
+        .panel { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .active-panel { display: flex; }
+
+        /* --- ADMIN TOOLS --- */
+        .tool-section { margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+        .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px; display: block; }
+
+        .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+        .preset-btn { 
+            padding: 8px; border: 1px solid var(--border); background: #f8fafc; border-radius: 6px; 
+            cursor: pointer; font-size: 11px; text-align: center; transition: 0.2s;
         }
+        .preset-btn:hover { border-color: var(--primary); color: var(--primary); background: #eef2ff; }
+        .preset-btn i { display: block; font-size: 20px; margin-bottom: 4px; }
 
-        /* PERBAIKAN 1: BOX KODE ADMIN AGAR MEMANJANG KE BAWAH */
-        .editor-box {
-            flex-grow: 1;          /* Memaksa mengisi sisa ruang kosong */
-            width: 100%;           /* Lebar penuh */
-            background: #111827; 
-            color: #a5b4fc; 
-            border-radius: 8px; 
-            padding: 15px; 
-            font-family: 'JetBrains Mono', monospace; 
-            font-size: 12px; 
-            resize: none; 
-            border: none; 
-            outline: none; 
-            margin-bottom: 15px;
-            overflow-y: auto;      /* Scroll di dalam box kode jika terlalu panjang */
-        }
-
-        .toolbar { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; flex-shrink: 0; }
-        .tag-btn { background: #eef2ff; border: 1px solid #c7d2fe; color: #4f46e5; font-size: 10px; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-weight: 600; }
-        .tag-btn:hover { background: #4f46e5; color: white; }
-
-        /* PANEL USER */
-        #user-panel { display: none; flex: 1; flex-direction: column; }
-        #dynamic-form { flex: 1; overflow-y: auto; padding-right: 5px; }
-        .form-group { margin-bottom: 15px; }
-        label { font-size: 12px; font-weight: 600; color: #374151; display: block; margin-bottom: 6px; }
-        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
-
-        /* BUTTONS */
-        .btn { padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; flex-shrink: 0; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-save { background: #059669; color: white; }
-        .btn-secondary { background: #f3f4f6; color: #374151; }
-
-        /* PREVIEW AREA */
-        .preview-area { flex: 1; background: #e5e7eb; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 40px; background-image: radial-gradient(#9ca3af 1px, transparent 1px); background-size: 20px 20px; }
+        .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .input-box { flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
         
-        #flyer-canvas { 
-            background: white; box-shadow: 0 20px 50px rgba(0,0,0,0.15); display: inline-block; 
-            min-width: 100px; min-height: 100px; outline: none; transition: box-shadow 0.2s;
-        }
-        /* Efek saat Admin mengedit Canvas */
-        .admin-editing #flyer-canvas:hover { box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.3); cursor: text; }
-        .admin-editing #flyer-canvas:focus { box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.6); }
+        .btn-icon { padding: 8px 12px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+        .btn-icon:hover { background: #e2e8f0; }
 
-        #loader { position: fixed; inset: 0; background: white; z-index: 999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Editor Hitam */
+        .code-editor {
+            flex: 1; min-height: 200px; width: 100%;
+            background: #1e293b; color: #cbd5e1; border-radius: 8px; padding: 15px;
+            font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5;
+            border: none; resize: none; margin-bottom: 10px;
+        }
+
+        /* --- USER FORM --- */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--dark); display: block; margin-bottom: 6px; }
+        .form-input { 
+            width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; 
+            transition: 0.2s;
+        }
+        .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        input[type="color"] { height: 40px; padding: 2px; cursor: pointer; }
+
+        /* --- ACTION BAR --- */
+        .action-bar { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border); display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+        .btn { padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-primary { background: var(--primary); color: white; grid-column: span 2; }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-outline { border: 1px solid var(--border); background: white; color: #475569; }
+        .btn-save { background: #059669; color: white; grid-column: span 2; }
+
+        /* --- PREVIEW AREA --- */
+        .preview-area { 
+            flex: 1; background: #e2e8f0; display: flex; align-items: center; justify-content: center; 
+            overflow: auto; padding: 40px; 
+            background-image: radial-gradient(#94a3b8 1px, transparent 1px); background-size: 24px 24px; 
+        }
+        #flyer-canvas { 
+            background: white; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); 
+            min-width: 100px; min-height: 100px; transition: transform 0.3s;
+        }
+
+        /* --- MODAL --- */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 300px; text-align: center; box-shadow: 0 20px 25px rgba(0,0,0,0.1); }
+
+        /* Loader */
+        #loader { position: fixed; inset: 0; background: white; z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f1f5f9; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         @media (max-width: 800px) { body { flex-direction: column; overflow: auto; height: auto; } .sidebar { width: 100%; height: auto; border-right: none; } .preview-area { min-height: 500px; } }
     </style>
@@ -106,52 +116,152 @@
 
     <div id="loader">
         <div class="spinner"></div>
-        <h3 style="color:#4f46e5; font-size: 14px;">Menghubungkan Database...</h3>
+        <small style="color:#64748b">Menyiapkan Aplikasi...</small>
+    </div>
+
+    <div id="msgModal" class="modal">
+        <div class="modal-content">
+            <h3 id="mTitle" style="margin:0 0 10px 0;">Judul</h3>
+            <p id="mDesc" style="font-size:13px; color:#64748b; margin-bottom:20px;">Pesan</p>
+            <button onclick="document.getElementById('msgModal').style.display='none'" class="btn btn-primary">OK</button>
+        </div>
     </div>
 
     <div class="sidebar">
         <div class="header">
-            <h1 id="app-title">Flyer App</h1>
-            <span id="role-badge" class="badge badge-user">PUBLIK</span>
+            <div class="app-brand">
+                <h1>Flyer Creator Pro</h1>
+                <span>Versi 2.0 (QR + Presets)</span>
+            </div>
+            <span id="role-badge" class="badge badge-user">LOADING</span>
         </div>
 
-        <div id="admin-panel">
-            <div style="font-size:11px; color:#6b7280; margin-bottom:10px; background:#f9fafb; padding:10px; border-radius:6px; border:1px dashed #d1d5db;">
-                ✨ <b>Mode Visual Editor:</b><br>
-                1. Paste kode HTML di kotak hitam.<br>
-                2. Atau <b>Klik langsung pada Gambar Flyer</b> di kanan untuk mengedit teks.<br>
-                3. Klik tombol <code>+ {{NAMA}}</code> untuk menambah kolom inputan user.
-            </div>
-
-            <div class="toolbar">
-                <button class="tag-btn" onclick="insertTag('{{NAMA}}')">+ {{NAMA}}</button>
-                <button class="tag-btn" onclick="insertTag('{{JABATAN}}')">+ {{JABATAN}}</button>
-                <button class="tag-btn" onclick="insertTag('{{INSTANSI}}')">+ {{INSTANSI}}</button>
-            </div>
-
-            <textarea id="htmlInput" class="editor-box" placeholder="Kode HTML muncul di sini..." oninput="syncCodeToCanvas()"></textarea>
+        <div id="admin-panel" class="panel">
             
-            <button class="btn btn-save" onclick="saveTemplate(this)">💾 Simpan Perubahan</button>
+            <div class="tool-section">
+                <span class="section-title">1. Pilih Template Dasar</span>
+                <div class="preset-grid">
+                    <div class="preset-btn" onclick="loadPreset('promo')">
+                        <i class="ph ph-storefront"></i> Promo
+                    </div>
+                    <div class="preset-btn" onclick="loadPreset('event')">
+                        <i class="ph ph-microphone-stage"></i> Event
+                    </div>
+                    <div class="preset-btn" onclick="loadPreset('cert')">
+                        <i class="ph ph-certificate"></i> Sertifikat
+                    </div>
+                </div>
+            </div>
+
+            <div class="tool-section">
+                <span class="section-title">2. Sisipkan Fitur Dinamis</span>
+                <div class="input-row">
+                    <input type="text" id="varInput" class="input-box" placeholder="Nama Label (ex: HARGA)" onkeypress="handleEnter(event)">
+                    <button class="btn-icon" onclick="addVariable()"><i class="ph ph-plus"></i> Label</button>
+                </div>
+                <div class="input-row">
+                    <button class="btn-icon" style="width:100%" onclick="insertQR()"><i class="ph ph-qr-code"></i> Sisipkan Tempat QR Code</button>
+                </div>
+            </div>
+
+            <textarea id="htmlInput" class="code-editor" placeholder="Source code HTML..." oninput="syncCodeToCanvas()"></textarea>
+
+            <div class="action-bar">
+                <button class="btn btn-outline" onclick="downloadHTML('Admin_Template')"><i class="ph ph-code"></i> HTML</button>
+                <button class="btn btn-outline" onclick="downloadImage('Master_Design')"><i class="ph ph-image"></i> PNG</button>
+                <button class="btn btn-save" onclick="saveTemplate(this)"><i class="ph ph-floppy-disk"></i> Simpan ke Server</button>
+            </div>
         </div>
 
-        <div id="user-panel">
+        <div id="user-panel" class="panel">
+            <div style="background:#f0f9ff; border:1px dashed #bae6fd; padding:15px; border-radius:8px; margin-bottom:20px;">
+                <h4 style="margin:0 0 5px 0; font-size:13px; color:#0284c7;">🎨 Kustomisasi Desain</h4>
+                <p style="margin:0; font-size:11px; color:#0c4a6e;">Ubah teks, warna, dan QR code sesuai kebutuhan Anda.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Tema Warna Flyer</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="color" id="colorPicker" value="#4f46e5" oninput="updateColor(this.value)">
+                    <span style="font-size:11px; color:#64748b;">Klik kotak untuk ganti warna</span>
+                </div>
+            </div>
+
             <div id="dynamic-form"></div>
-            <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #eee;">
-                <button class="btn btn-primary" id="btnDL" onclick="downloadImage()">⬇️ Download Gambar</button>
+
+            <div class="action-bar">
+                <button class="btn btn-outline" onclick="downloadHTML('Flyer_Saya')"><i class="ph ph-file-html"></i> Simpan HTML</button>
+                <button class="btn btn-primary" id="btnDL" onclick="downloadImage('Flyer_Final')"><i class="ph ph-download-simple"></i> Download Gambar</button>
             </div>
         </div>
     </div>
 
     <div class="preview-area" id="preview-container">
+        <div id="qr-generator-dump" style="display:none;"></div>
+        
         <div id="flyer-canvas"></div>
     </div>
 
     <script>
-        // --- KONFIGURASI API ---
-        const API_URL = "https://script.google.com/macros/s/AKfycbzEd4YG1VlOFcbgVip6XrOe4quWAImkvcOvzVerTYavMkiuU1F6nSmoxd56b7DbEw7W/exec"; 
-
+        const API_URL = "https://script.google.com/macros/s/AKfycbzEd4YG1VlOFcbgVip6XrOe4quWAImkvcOvzVerTYavMkiuU1F6nSmoxd56b7DbEw7W/exec";
         let RAW_TEMPLATE = "";
+        
+        // --- DATABASE PRESETS (TEMPLATE BAWAAN) ---
+        const PRESETS = {
+            promo: `<div style="width:400px; height:500px; background:white; position:relative; overflow:hidden; border:1px solid #ddd;">
+    <div style="background:var(--theme-color); height:150px; border-radius:0 0 50% 50%;"></div>
+    <div style="position:absolute; top:40px; left:0; right:0; text-align:center;">
+        <h1 style="color:white; margin:0; font-size:32px; font-family:sans-serif;">GRAND SALE</h1>
+        <p style="color:white; opacity:0.9;">Diskon Spesial Hari Ini</p>
+    </div>
+    <div style="text-align:center; margin-top:50px; padding:20px;">
+        <h2 style="color:var(--theme-color); font-size:48px; margin:0;">{{DISKON}}%</h2>
+        <h3 style="color:#333; margin:10px 0;">{{NAMA_PRODUK}}</h3>
+        <p style="color:#666; font-size:14px;">Dapatkan harga spesial hanya di toko kami.</p>
+        <div style="margin:20px auto;">{{QR_CODE}}</div>
+        <small>Scan untuk Info</small>
+    </div>
+</div>`,
 
+            event: `<div style="width:400px; height:600px; background:#1a1a1a; color:white; font-family:sans-serif; position:relative; padding:40px;">
+    <div style="border: 2px solid var(--theme-color); height:100%; padding:20px; box-sizing:border-box;">
+        <span style="background:var(--theme-color); padding:5px 10px; font-size:12px; font-weight:bold;">WEBINAR</span>
+        <h1 style="font-size:40px; margin:20px 0 10px 0; line-height:1.1;">{{JUDUL_ACARA}}</h1>
+        <p style="color:#aaa;">Bersama: <strong style="color:white">{{PEMBICARA}}</strong></p>
+        
+        <div style="margin-top:40px; border-top:1px solid #333; padding-top:20px;">
+            <p>📅 {{TANGGAL}}</p>
+            <p>⏰ {{JAM}}</p>
+        </div>
+
+        <div style="position:absolute; bottom:60px; right:60px;">
+            {{QR_CODE}}
+            <div style="font-size:10px; text-align:center; margin-top:5px; color:#aaa;">DAFTAR</div>
+        </div>
+    </div>
+</div>`,
+
+            cert: `<div style="width:800px; height:560px; background:white; padding:40px; box-sizing:border-box; border:10px solid var(--theme-color); font-family:serif; text-align:center; position:relative;">
+    <h1 style="font-size:60px; color:var(--theme-color); margin:20px 0;">SERTIFIKAT</h1>
+    <p style="font-size:18px; color:#555;">Diberikan Kepada:</p>
+    <h2 style="font-size:42px; margin:10px 0; border-bottom:2px solid #eee; display:inline-block; padding:0 50px;">{{NAMA_PESERTA}}</h2>
+    <p style="font-size:16px; color:#666; margin-top:20px;">Atas partisipasinya dalam acara:</p>
+    <h3 style="font-size:24px; color:#333;">{{NAMA_ACARA}}</h3>
+    
+    <div style="display:flex; justify-content:space-between; margin-top:80px; padding:0 50px;">
+        <div style="text-align:center;">
+            {{QR_CODE}}
+            <p style="font-size:10px;">Verifikasi</p>
+        </div>
+        <div style="text-align:center; width:200px;">
+            <div style="border-bottom:1px solid #333; height:50px;"></div>
+            <p>Panitia Pelaksana</p>
+        </div>
+    </div>
+</div>`
+        };
+
+        // --- INIT SYSTEM ---
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const modeParam = urlParams.get('mode');
@@ -159,8 +269,6 @@
             fetch(API_URL + "?action=getSettings")
                 .then(res => res.json())
                 .then(data => {
-                    if(data.JudulApp) document.getElementById('app-title').innerText = data.JudulApp;
-
                     if (modeParam && modeParam === data.PasscodeAdmin) {
                         initAdmin(data.TemplateAktif);
                     } else {
@@ -170,154 +278,253 @@
                 })
                 .catch(err => {
                     console.error(err);
-                    alert("Koneksi Error. Cek Console.");
-                    document.getElementById('loader').innerHTML = "<p style='color:red'>Gagal Terhubung.</p>";
+                    alert("Gagal koneksi server.");
+                    document.getElementById('loader').style.display = 'none';
                 });
         };
 
-        // ================= ADMIN LOGIC =================
-
-        function initAdmin(savedTemplate) {
-            document.getElementById('admin-panel').style.display = 'flex';
+        // --- ADMIN FUNCTIONS ---
+        function initAdmin(savedData) {
+            document.getElementById('admin-panel').classList.add('active-panel');
             document.getElementById('role-badge').className = 'badge badge-admin';
-            document.getElementById('role-badge').innerText = 'ADMIN EDITOR';
-            
-            // Tambahkan class ke container agar ada efek hover visual
-            document.getElementById('preview-container').classList.add('admin-editing');
+            document.getElementById('role-badge').innerText = 'ADMIN MODE';
+            document.getElementById('preview-container').style.padding = '20px'; // Lebih luas buat admin
 
-            // 1. Aktifkan Fitur Edit di Canvas (Visual Editing)
             const canvas = document.getElementById('flyer-canvas');
-            canvas.setAttribute('contenteditable', 'true'); // MAGIC DISINI
-            canvas.setAttribute('spellcheck', 'false'); // Matikan garis merah ejaan
+            canvas.setAttribute('contenteditable', 'true');
             
-            // Event Listener: Saat Admin ngetik di Canvas, update Textarea (Sync Balik)
-            canvas.addEventListener('input', function() {
+            // Sync saat admin ngetik manual di canvas
+            canvas.addEventListener('input', () => {
                 document.getElementById('htmlInput').value = canvas.innerHTML;
             });
 
-            if(savedTemplate) {
-                canvas.innerHTML = savedTemplate;
-                document.getElementById('htmlInput').value = savedTemplate;
+            if(savedData) {
+                canvas.innerHTML = savedData;
+                document.getElementById('htmlInput').value = savedData;
             } else {
-                canvas.innerHTML = "<div style='padding:50px; text-align:center;'>Paste HTML di sini...</div>";
+                loadPreset('promo'); // Default preset
             }
         }
 
-        // Fungsi Sync: Textarea -> Canvas (Untuk Paste kode dari Gemini)
-        function syncCodeToCanvas() {
-            const code = document.getElementById('htmlInput').value;
+        function loadPreset(type) {
+            const code = PRESETS[type];
             document.getElementById('flyer-canvas').innerHTML = code;
+            document.getElementById('htmlInput').value = code;
         }
 
-        // Fungsi Bantuan: Masukkan {{TAG}} ke dalam Textarea/Canvas
-        function insertTag(tag) {
-            // Kita masukkan ke Canvas karena Admin sedang fokus visual
+        function addVariable() {
+            const val = document.getElementById('varInput').value.trim().toUpperCase().replace(/\s+/g, '_');
+            if(!val) return;
+            insertAtCursor(`{{${val}}}`);
+            document.getElementById('varInput').value = "";
+        }
+
+        function insertQR() {
+            // Placeholder visual untuk admin
+            const qrTag = `<div style="display:inline-block; background:#eee; padding:10px; border:1px dashed #333;">{{QR_CODE}}</div>`;
+            insertAtCursor(qrTag);
+        }
+
+        function insertAtCursor(text) {
             const canvas = document.getElementById('flyer-canvas');
             canvas.focus();
-            
-            // Insert text at cursor position
-            document.execCommand('insertText', false, tag);
-            
-            // Sync ke textarea
+            document.execCommand('insertHTML', false, text);
             document.getElementById('htmlInput').value = canvas.innerHTML;
         }
 
-        function saveTemplate(btn) {
-            // Ambil data DARI CANVAS (karena itu yang terbaru hasil edit visual)
-            const code = document.getElementById('flyer-canvas').innerHTML;
-            
-            if(!code) { alert("Desain kosong!"); return; }
+        function syncCodeToCanvas() {
+            document.getElementById('flyer-canvas').innerHTML = document.getElementById('htmlInput').value;
+        }
 
-            btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
+        function saveTemplate(btn) {
+            const code = document.getElementById('flyer-canvas').innerHTML;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "⏳ Menyimpan..."; btn.disabled = true;
 
             fetch(API_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: "saveTemplate", payload: code })
             })
             .then(res => res.json())
-            .then(response => {
-                alert("✅ Desain Tersimpan! User sudah bisa melihat update ini.");
-                btn.innerText = "💾 Simpan Perubahan"; btn.disabled = false;
+            .then(() => {
+                showMsg("Berhasil", "Template disimpan & Live untuk publik.");
+                btn.innerHTML = originalText; btn.disabled = false;
             })
-            .catch(err => {
-                // Biasanya error CORS di GAS tetap berhasil simpan di backend
-                alert("Perintah dikirim (Cek Mode User untuk konfirmasi).");
-                btn.innerText = "💾 Simpan Perubahan"; btn.disabled = false;
+            .catch(() => {
+                showMsg("Info", "Perintah dikirim ke server.");
+                btn.innerHTML = originalText; btn.disabled = false;
             });
         }
 
-        // ================= USER LOGIC =================
+        function handleEnter(e) { if(e.key === 'Enter') addVariable(); }
 
+        // --- USER FUNCTIONS ---
         function initUser(template) {
-            document.getElementById('user-panel').style.display = 'flex';
-            
-            // PERBAIKAN: Memastikan badge tulisannya PUBLIK saat mode user
+            document.getElementById('user-panel').classList.add('active-panel');
             document.getElementById('role-badge').innerText = 'PUBLIK';
 
-            if (!template || template === "") {
-                document.getElementById('flyer-canvas').innerHTML = "<div style='padding:50px; text-align:center;'>Belum ada desain aktif.</div>";
+            if(!template) {
+                document.getElementById('flyer-canvas').innerHTML = "<p>Belum ada template.</p>";
                 return;
             }
 
             RAW_TEMPLATE = template;
             document.getElementById('flyer-canvas').innerHTML = RAW_TEMPLATE;
+            
+            // Set default color variable
+            document.getElementById('flyer-canvas').style.setProperty('--theme-color', '#4f46e5');
+            
             generateForm(RAW_TEMPLATE);
         }
 
+        function updateColor(color) {
+            // Update CSS Variable di Canvas
+            document.getElementById('flyer-canvas').style.setProperty('--theme-color', color);
+        }
+
         function generateForm(htmlCode) {
-            const formContainer = document.getElementById('dynamic-form');
-            formContainer.innerHTML = "";
+            const container = document.getElementById('dynamic-form');
+            container.innerHTML = "";
             
-            const regex = /{{\s*(.*?)\s*}}/g;
+            // 1. Detect Standard Variables {{VAR}}
+            const regex = /{{\s*([a-zA-Z0-9_]+)\s*}}/g;
             let match;
             const uniqueLabels = new Set();
+            let hasQR = false;
 
             while ((match = regex.exec(htmlCode)) !== null) {
                 const label = match[1].trim();
-                if(!uniqueLabels.has(label)) {
+                
+                if (label === 'QR_CODE') {
+                    hasQR = true; // Flag khusus buat QR
+                } else if(!uniqueLabels.has(label)) {
                     uniqueLabels.add(label);
+                    const niceLabel = label.replace(/_/g, ' ');
+                    
                     const div = document.createElement('div');
                     div.className = 'form-group';
-                    div.innerHTML = `<label>${label}</label><input type="text" data-target="${label}" placeholder="Isi ${label}..." onkeyup="updateLivePreview()">`;
-                    formContainer.appendChild(div);
+                    div.innerHTML = `<label>${niceLabel}</label><input type="text" class="form-input" data-target="${label}" placeholder="Isi ${niceLabel}..." onkeyup="updateContent()">`;
+                    container.appendChild(div);
                 }
             }
 
-            if(uniqueLabels.size === 0) formContainer.innerHTML = "<p style='text-align:center; font-size:12px; color:#666;'>Template Statis (Siap Download).</p>";
+            // 2. Jika ada {{QR_CODE}}, buat input khusus
+            if(hasQR) {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                div.style.background = "#fff1f2"; // Highlight dikit
+                div.style.padding = "10px";
+                div.style.borderRadius = "6px";
+                div.style.border = "1px solid #fecdd3";
+                
+                div.innerHTML = `<label style="color:#be123c"><i class="ph ph-qr-code"></i> Isi Link QR Code</label>
+                                 <input type="text" id="qrInput" class="form-input" placeholder="https://..." onkeyup="generateQR()">`;
+                container.prepend(div); // Taruh paling atas
+            }
+
+            if(uniqueLabels.size === 0 && !hasQR) {
+                container.innerHTML = "<p style='font-size:12px; text-align:center; color:#888'>Template ini tidak butuh data inputan.</p>";
+            }
         }
 
-        function updateLivePreview() {
+        function updateContent() {
             let currentHTML = RAW_TEMPLATE;
-            const inputs = document.querySelectorAll('#dynamic-form input');
+            const inputs = document.querySelectorAll('#dynamic-form input:not(#qrInput)'); // Skip QR Input
             
             inputs.forEach(input => {
                 const target = input.getAttribute('data-target');
                 const val = input.value;
                 const displayTxt = val === "" ? target : val;
+                
                 const reg = new RegExp("{{\\s*" + target + "\\s*}}", "g");
                 currentHTML = currentHTML.replace(reg, displayTxt);
             });
 
+            // Kembalikan ke canvas (tapi hati-hati jangan timpa QR Code yang sudah digenerate)
+            // Trik: Kita replace text biasa dulu, QR code kita handle terpisah
+            // Tapi karena innerHTML me-reset DOM, kita harus re-generate QR setelah update text.
             document.getElementById('flyer-canvas').innerHTML = currentHTML;
+            
+            // Pastikan variable warna tetap ada setelah reset innerHTML
+            const color = document.getElementById('colorPicker').value;
+            document.getElementById('flyer-canvas').style.setProperty('--theme-color', color);
+
+            // Re-apply QR jika ada isinya
+            const qrInput = document.getElementById('qrInput');
+            if(qrInput && qrInput.value) generateQR();
         }
 
-        function downloadImage() {
-            const el = document.getElementById("flyer-canvas");
-            const btn = document.getElementById("btnDL");
-            btn.innerText = "⏳ Memproses..."; btn.disabled = true;
+        function generateQR() {
+            const text = document.getElementById('qrInput').value;
+            if(!text) return;
 
-            html2canvas(el, { scale: 2, useCORS: true, backgroundColor: null }).then(canvas => {
+            // Bersihkan container QR di dalam canvas
+            // Cari elemen yang mengandung teks {{QR_CODE}} atau elemen penggantinya
+            // Karena sulit mencari text node spesifik via JS murni setelah render, 
+            // Kita pakai cara replace string base64
+            
+            // 1. Generate QR di hidden div
+            const dump = document.getElementById('qr-generator-dump');
+            dump.innerHTML = "";
+            new QRCode(dump, { text: text, width: 100, height: 100 });
+            
+            // Tunggu sebentar agar canvas library render img tag
+            setTimeout(() => {
+                const imgQR = dump.querySelector('img');
+                if(imgQR) {
+                    const src = imgQR.src;
+                    // Cari string {{QR_CODE}} di HTML canvas dan ganti dengan IMG tag
+                    const canvas = document.getElementById('flyer-canvas');
+                    // Kita gunakan replace pada innerHTML untuk mengganti placeholder
+                    // Pastikan kita hanya replace placeholder, bukan merusak layout
+                    
+                    // Jika belum ada img tag, replace {{QR_CODE}}
+                    if(canvas.innerHTML.includes('{{QR_CODE}}')) {
+                        canvas.innerHTML = canvas.innerHTML.replace('{{QR_CODE}}', `<img src="${src}" id="live-qr" style="width:80px; height:80px;">`);
+                    } 
+                    // Jika sudah ada img tag (update), ganti src-nya
+                    else {
+                        const existingQR = canvas.querySelector('#live-qr');
+                        if(existingQR) existingQR.src = src;
+                    }
+                    
+                    // Kembalikan warna tema
+                    const color = document.getElementById('colorPicker').value;
+                    canvas.style.setProperty('--theme-color', color);
+                }
+            }, 50);
+        }
+
+        // --- SHARED DOWNLOAD ---
+        function downloadImage(name) {
+            const el = document.getElementById("flyer-canvas");
+            showMsg("Proses", "Sedang merender gambar kualitas tinggi...");
+            
+            html2canvas(el, { scale: 2, useCORS: true }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'Flyer-Saya.png';
+                link.download = name + '.png';
                 link.href = canvas.toDataURL("image/png");
                 link.click();
-                
-                // Kirim log download (opsional, error handler dimatikan agar tidak ganggu user)
-                fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "saveLog", payload: "Download User" }) }).catch(e=>{});
-                
-                btn.innerText = "⬇️ Download Gambar"; btn.disabled = false;
+                document.getElementById('msgModal').style.display='none';
             });
         }
+
+        function downloadHTML(name) {
+            const content = document.getElementById("flyer-canvas").innerHTML;
+            const fullHTML = `<html><body style="display:flex;justify-content:center;background:#eee;padding:50px;"><div style="background:white;box-shadow:0 0 10px #ccc">${content}</div></body></html>`;
+            const blob = new Blob([fullHTML], {type: 'text/html'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = name + '.html';
+            a.click();
+        }
+
+        function showMsg(title, desc) {
+            document.getElementById('mTitle').innerText = title;
+            document.getElementById('mDesc').innerText = desc;
+            document.getElementById('msgModal').style.display = 'flex';
+        }
+
     </script>
 </body>
 </html>
