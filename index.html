@@ -3,62 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flyer Generator</title>
+    <title>Flyer Generator App</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     
     <style>
-        /* CSS SAMA SEPERTI SEBELUMNYA */
-        :root { --primary: #4f46e5; --dark: #1e1e2e; --bg: #f3f4f6; --sidebar-w: 400px; }
+        /* --- CSS UI APLIKASI (JANGAN DIUBAH) --- */
+        :root { 
+            --primary: #4f46e5; 
+            --dark: #1e1e2e; 
+            --bg: #f3f4f6; 
+            --sidebar-w: 400px; 
+        }
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
         
-        .sidebar { width: var(--sidebar-w); background: white; padding: 25px; display: flex; flex-direction: column; border-right: 1px solid #e5e7eb; z-index: 10; }
+        body { 
+            margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); height: 100vh; display: flex; overflow: hidden; 
+        }
+
+        /* SIDEBAR KIRI */
+        .sidebar { 
+            width: var(--sidebar-w); background: white; padding: 25px; 
+            display: flex; flex-direction: column; border-right: 1px solid #e5e7eb; 
+            z-index: 10; box-shadow: 4px 0 15px rgba(0,0,0,0.05); 
+        }
+        
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
         h1 { font-size: 18px; color: var(--dark); margin: 0; font-weight: 800; }
-        .badge { font-size: 10px; padding: 4px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
+        .badge { font-size: 10px; padding: 4px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;}
         .badge-user { background: #e0e7ff; color: var(--primary); }
         .badge-admin { background: #dcfce7; color: #166534; }
 
-        #admin-panel, #user-panel { display: none; flex: 1; flex-direction: column; }
-        .editor-box { flex: 1; background: #111827; color: #a5b4fc; border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: none; border: none; outline: none; margin-bottom: 15px; }
+        /* PANEL ADMIN */
+        #admin-panel { display: none; flex: 1; flex-direction: column; }
+        .editor-box {
+            flex: 1; background: #111827; color: #a5b4fc; 
+            border-radius: 8px; padding: 15px; 
+            font-family: 'JetBrains Mono', monospace; font-size: 12px; 
+            resize: none; border: none; outline: none; margin-bottom: 15px;
+        }
+        .tips { font-size: 11px; color: #dc2626; margin-bottom: 10px; background: #fee2e2; padding: 10px; border-radius: 6px; line-height: 1.4; border: 1px solid #fecaca;}
+
+        /* PANEL USER */
+        #user-panel { display: none; flex: 1; flex-direction: column; }
+        #dynamic-form { flex: 1; overflow-y: auto; padding-right: 5px; }
         
-        #dynamic-form { flex: 1; overflow-y: auto; }
         .form-group { margin-bottom: 15px; }
         label { font-size: 12px; font-weight: 600; color: #374151; display: block; margin-bottom: 6px; }
-        input { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; }
+        input[type="text"] { 
+            width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; 
+            font-size: 14px; transition: 0.2s; 
+        }
+        input[type="text"]:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+
+        /* TOMBOL */
+        .btn { 
+            padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; 
+            width: 100%; margin-top: 10px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-save { background: #059669; color: white; }
+        .btn-secondary { background: #f3f4f6; color: #374151; }
+
+        /* PREVIEW KANAN */
+        .preview-area { 
+            flex: 1; background: #e5e7eb; 
+            display: flex; align-items: center; justify-content: center; 
+            overflow: auto; padding: 40px; 
+            background-image: radial-gradient(#9ca3af 1px, transparent 1px); background-size: 20px 20px;
+        }
         
-        .btn { padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; color: white; }
-        .btn-primary { background: var(--primary); }
-        .btn-save { background: #059669; }
-        
-        .preview-area { flex: 1; background: #e5e7eb; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 40px; }
-        #flyer-canvas { background: white; box-shadow: 0 20px 50px rgba(0,0,0,0.15); display: inline-block; min-width: 100px; min-height: 100px; }
-        
-        @media (max-width: 800px) { body { flex-direction: column; overflow: auto; height: auto; } .sidebar { width: 100%; height: auto; } .preview-area { min-height: 500px; } }
-        #loader { position: fixed; inset: 0; background: white; z-index: 999; display: flex; align-items: center; justify-content: center; }
-    </script>
+        #flyer-canvas { 
+            background: white; box-shadow: 0 20px 50px rgba(0,0,0,0.15); 
+            display: inline-block; transition: transform 0.2s; 
+            /* Min size agar tidak hilang saat kosong */
+            min-width: 100px; min-height: 100px;
+        }
+
+        /* LOADING OVERLAY */
+        #loader { 
+            position: fixed; inset: 0; background: white; z-index: 999; 
+            display: flex; align-items: center; justify-content: center; flex-direction: column; 
+        }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Responsive HP */
+        @media (max-width: 800px) {
+            body { flex-direction: column; overflow: auto; height: auto; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #ccc; }
+            .preview-area { min-height: 500px; }
+        }
+    </style>
 </head>
 <body>
 
-    <div id="loader"><h3>Menghubungkan ke Database...</h3></div>
+    <div id="loader">
+        <div class="spinner"></div>
+        <h3 style="color:#4f46e5; font-size: 14px;">Menghubungkan ke Database...</h3>
+    </div>
 
     <div class="sidebar">
         <div class="header">
             <h1 id="app-title">Flyer App</h1>
-            <span id="role-badge" class="badge badge-user">USER MODE</span>
+            <span id="role-badge" class="badge badge-user">USER</span>
         </div>
 
         <div id="admin-panel">
-            <p style="font-size:12px">Paste HTML (Inline CSS) dari Gemini:</p>
-            <textarea id="htmlInput" class="editor-box"></textarea>
-            <button class="btn btn-save" onclick="saveTemplate()">💾 Simpan Desain</button>
-            <button class="btn btn-primary" onclick="renderAdminPreview()" style="background:#64748b">🔄 Test Preview</button>
+            <div class="tips">
+                ⚠️ <b>PENTING:</b> Gunakan <b>Inline CSS</b>. Jangan gunakan Tailwind/Bootstrap. 
+                <br>Gunakan kode <code>{{NAMA}}</code>, <code>{{JABATAN}}</code> di HTML untuk membuat input otomatis.
+            </div>
+            <textarea id="htmlInput" class="editor-box" placeholder="Paste kode HTML Inline CSS di sini..."></textarea>
+            
+            <button class="btn btn-save" onclick="saveTemplate(this)">💾 Simpan Desain</button>
+            <button class="btn btn-secondary" onclick="renderAdminPreview()">🔄 Test Preview</button>
         </div>
 
         <div id="user-panel">
-            <div id="dynamic-form"></div>
-            <button class="btn btn-primary" id="btnDL" onclick="downloadImage()">⬇️ Download Gambar</button>
+            <div id="dynamic-form">
+                </div>
+            
+            <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #eee;">
+                <button class="btn btn-primary" id="btnDL" onclick="downloadImage()">
+                    ⬇️ Download Gambar
+                </button>
+            </div>
         </div>
     </div>
 
@@ -67,124 +140,170 @@
     </div>
 
     <script>
-        // --- KONFIGURASI PENTING ---
-        // Masukkan URL Deployment Google Apps Script Anda di sini
+        // --- KONFIGURASI API ---
+        // URL ini saya ambil dari pesan Anda sebelumnya.
         const API_URL = "https://script.google.com/macros/s/AKfycbzEd4YG1VlOFcbgVip6XrOe4quWAImkvcOvzVerTYavMkiuU1F6nSmoxd56b7DbEw7W/exec"; 
 
         let RAW_TEMPLATE = "";
 
         window.onload = function() {
-            // Ambil Parameter URL ?mode=12345
+            // Ambil Parameter URL ?mode=...
             const urlParams = new URLSearchParams(window.location.search);
             const modeParam = urlParams.get('mode');
 
-            // 1. FETCH DATA DARI GAS (GET)
+            // 1. Fetch Data dari Google Sheet via API
             fetch(API_URL + "?action=getSettings")
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById('app-title').innerText = data.JudulApp;
+                    // Update Judul App sesuai Database
+                    if(data.JudulApp) document.getElementById('app-title').innerText = data.JudulApp;
 
-                    // Cek Apakah Admin?
+                    // Cek Apakah Password Admin Benar?
+                    // data.PasscodeAdmin diambil dari kolom B baris 3 di Sheet Settings
                     if (modeParam && modeParam === data.PasscodeAdmin) {
                         initAdmin(data.TemplateAktif);
                     } else {
                         initUser(data.TemplateAktif);
                     }
+                    
+                    // Sembunyikan Loader
                     document.getElementById('loader').style.display = 'none';
                 })
                 .catch(err => {
-                    alert("Gagal koneksi ke Database. Cek Console.");
                     console.error(err);
+                    alert("Gagal terhubung ke Database Google Sheet. Pastikan URL API benar dan deployment 'Anyone'.");
+                    document.getElementById('loader').innerHTML = "<p style='color:red'>Koneksi Error. Cek Console.</p>";
                 });
         };
 
-        // --- ADMIN FUNCTIONS ---
-        function initAdmin(template) {
+        // --- FUNGSI ADMIN ---
+        function initAdmin(savedTemplate) {
             document.getElementById('admin-panel').style.display = 'flex';
             document.getElementById('role-badge').className = 'badge badge-admin';
-            document.getElementById('role-badge').innerText = 'ADMIN CREATOR';
-            if(template) {
-                document.getElementById('htmlInput').value = template;
+            document.getElementById('role-badge').innerText = 'ADMIN MODE';
+
+            if(savedTemplate) {
+                document.getElementById('htmlInput').value = savedTemplate;
                 renderAdminPreview();
             }
         }
 
-        function saveTemplate() {
+        function saveTemplate(btn) {
             const code = document.getElementById('htmlInput').value;
-            const btn = document.querySelector('.btn-save');
-            btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
+            if(!code) { alert("Kode HTML tidak boleh kosong!"); return; }
 
-            // KIRIM DATA KE GAS (POST)
-            // Gunakan no-cors atau text/plain untuk bypass CORS preflight sederhana
+            btn.innerText = "⏳ Menyimpan...";
+            btn.disabled = true;
+
+            // Kirim Data ke API (POST)
+            // Menggunakan no-cors / text-plain trick untuk GAS
             fetch(API_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: "saveTemplate", payload: code })
-            }).then(res => {
-                alert("Desain berhasil disimpan! Semua user akan melihat update ini.");
-                btn.innerText = "💾 Simpan Desain"; btn.disabled = false;
+            })
+            .then(res => res.json())
+            .then(response => {
+                alert("✅ " + response.message);
+                btn.innerText = "💾 Simpan Desain";
+                btn.disabled = false;
+            })
+            .catch(err => {
+                // Kadang GAS mengembalikan error CORS walau data tersimpan
+                // Kita asumsikan sukses jika errornya syntax, tapi idealnya cek response
+                console.log("Response Log:", err);
+                alert("Perintah dikirim! Cek User Mode untuk memastikan.");
+                btn.innerText = "💾 Simpan Desain";
+                btn.disabled = false;
             });
         }
 
         function renderAdminPreview() {
-            document.getElementById('flyer-canvas').innerHTML = document.getElementById('htmlInput').value;
+            const code = document.getElementById('htmlInput').value;
+            document.getElementById('flyer-canvas').innerHTML = code;
         }
 
-        // --- USER FUNCTIONS ---
+        // --- FUNGSI USER ---
         function initUser(template) {
             document.getElementById('user-panel').style.display = 'flex';
-            RAW_TEMPLATE = template || "<div style='padding:20px'>Belum ada desain.</div>";
+            
+            if (!template || template === "") {
+                document.getElementById('flyer-canvas').innerHTML = "<div style='padding:50px; text-align:center;'>Admin belum membuat desain.</div>";
+                return;
+            }
+
+            RAW_TEMPLATE = template;
             document.getElementById('flyer-canvas').innerHTML = RAW_TEMPLATE;
             generateForm(RAW_TEMPLATE);
         }
 
-        function generateForm(html) {
-            const container = document.getElementById('dynamic-form');
-            container.innerHTML = "";
+        function generateForm(htmlCode) {
+            const formContainer = document.getElementById('dynamic-form');
+            formContainer.innerHTML = ""; // Reset
+            
+            // Regex mencari kata {{...}}
             const regex = /{{\s*(.*?)\s*}}/g;
             let match;
-            const labels = new Set();
+            const uniqueLabels = new Set();
 
-            while ((match = regex.exec(html)) !== null) {
-                const label = match[1];
-                if(!labels.has(label)) {
-                    labels.add(label);
+            while ((match = regex.exec(htmlCode)) !== null) {
+                const label = match[1].trim();
+                
+                if(!uniqueLabels.has(label)) {
+                    uniqueLabels.add(label);
+                    
                     const div = document.createElement('div');
                     div.className = 'form-group';
-                    div.innerHTML = `<label>${label}</label><input type="text" data-target="${label}" onkeyup="updateLive()" placeholder="Isi ${label}...">`;
-                    container.appendChild(div);
+                    div.innerHTML = `
+                        <label>${label}</label>
+                        <input type="text" data-target="${label}" placeholder="Isi ${label}..." onkeyup="updateLivePreview()">
+                    `;
+                    formContainer.appendChild(div);
                 }
             }
-            if(labels.size === 0) container.innerHTML = "<p>Tidak ada data yang perlu diisi.</p>";
+
+            if(uniqueLabels.size === 0) {
+                formContainer.innerHTML = "<p style='text-align:center; font-size:12px; color:#666;'>Formulir tidak tersedia (Desain Statis).</p>";
+            }
         }
 
-        function updateLive() {
-            let html = RAW_TEMPLATE;
-            document.querySelectorAll('#dynamic-form input').forEach(input => {
+        function updateLivePreview() {
+            let currentHTML = RAW_TEMPLATE;
+            const inputs = document.querySelectorAll('#dynamic-form input');
+            
+            inputs.forEach(input => {
                 const target = input.getAttribute('data-target');
-                const val = input.value || target;
-                html = html.replace(new RegExp("{{\\s*" + target + "\\s*}}", "g"), val);
+                const val = input.value;
+                const displayTxt = val === "" ? target : val; // Jika kosong kembali ke label
+                
+                // Replace All occurrences
+                const reg = new RegExp("{{\\s*" + target + "\\s*}}", "g");
+                currentHTML = currentHTML.replace(reg, displayTxt);
             });
-            document.getElementById('flyer-canvas').innerHTML = html;
+
+            document.getElementById('flyer-canvas').innerHTML = currentHTML;
         }
 
         function downloadImage() {
             const el = document.getElementById("flyer-canvas");
             const btn = document.getElementById("btnDL");
-            btn.innerText = "⏳ Proses..."; btn.disabled = true;
+            
+            btn.innerText = "⏳ Memproses...";
+            btn.disabled = true;
 
-            html2canvas(el, { scale: 2, useCORS: true }).then(canvas => {
+            html2canvas(el, { scale: 2, useCORS: true, backgroundColor: null }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'Flyer-Saya.png';
                 link.href = canvas.toDataURL("image/png");
                 link.click();
                 
-                // LOG USER (Fire and forget)
+                // Simpan Log ke GAS (Fire & Forget)
                 fetch(API_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: "saveLog", payload: "User Download" })
+                    body: JSON.stringify({ action: "saveLog", payload: "Download User" })
                 });
 
-                btn.innerText = "⬇️ Download Gambar"; btn.disabled = false;
+                btn.innerText = "⬇️ Download Gambar";
+                btn.disabled = false;
             });
         }
     </script>
