@@ -3,207 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flyer Generator - Fixed Layout</title>
-    
+    <title>Flyer Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     
     <style>
-        /* --- RESET & UI GLOBAL --- */
+        /* CSS SAMA SEPERTI SEBELUMNYA */
+        :root { --primary: #4f46e5; --dark: #1e1e2e; --bg: #f3f4f6; --sidebar-w: 400px; }
         * { box-sizing: border-box; }
-        body {
-            margin: 0; padding: 0;
-            font-family: 'Inter', sans-serif;
-            background: #1e1e2e; /* Background gelap biar fokus */
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-        }
-
-        /* --- PANEL KIRI (EDITOR) --- */
-        .editor-panel {
-            width: 350px;
-            background: #252535;
-            border-right: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            color: white;
-            z-index: 10;
-        }
-
-        h3 { margin-top: 0; font-size: 16px; color: #a5b3ce; }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
         
-        textarea {
-            flex: 1;
-            background: #181820;
-            color: #fab387; /* Warna teks koding yang enak dilihat */
-            border: 1px solid #444;
-            border-radius: 6px;
-            padding: 15px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            resize: none;
-            outline: none;
-        }
+        .sidebar { width: var(--sidebar-w); background: white; padding: 25px; display: flex; flex-direction: column; border-right: 1px solid #e5e7eb; z-index: 10; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        h1 { font-size: 18px; color: var(--dark); margin: 0; font-weight: 800; }
+        .badge { font-size: 10px; padding: 4px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
+        .badge-user { background: #e0e7ff; color: var(--primary); }
+        .badge-admin { background: #dcfce7; color: #166534; }
+
+        #admin-panel, #user-panel { display: none; flex: 1; flex-direction: column; }
+        .editor-box { flex: 1; background: #111827; color: #a5b4fc; border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: none; border: none; outline: none; margin-bottom: 15px; }
         
-        .btn {
-            padding: 12px; margin-top: 15px;
-            border: none; border-radius: 6px; cursor: pointer; font-weight: bold;
-            transition: 0.2s;
-        }
-        .btn-update { background: #89b4fa; color: #1e1e2e; }
-        .btn-update:hover { background: #b4befe; }
+        #dynamic-form { flex: 1; overflow-y: auto; }
+        .form-group { margin-bottom: 15px; }
+        label { font-size: 12px; font-weight: 600; color: #374151; display: block; margin-bottom: 6px; }
+        input { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; }
         
-        .btn-download { background: #a6e3a1; color: #1e1e2e; margin-top: 10px;}
-        .btn-download:hover { background: #94e2d5; }
-
-        /* --- PANEL KANAN (PREVIEW AREA) --- */
-        .preview-area {
-            flex: 1;
-            background-color: #cdd6f4; /* Warna abu terang */
-            /* Pattern Background supaya kelihatan batas transparan */
-            background-image: linear-gradient(45deg, #bcc0cc 25%, transparent 25%), 
-                              linear-gradient(-45deg, #bcc0cc 25%, transparent 25%), 
-                              linear-gradient(45deg, transparent 75%, #bcc0cc 75%), 
-                              linear-gradient(-45deg, transparent 75%, #bcc0cc 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-            
-            /* PENTING: Scrollbar jika flyer besar */
-            overflow: auto; 
-            display: flex;
-            /* Flyer ditaruh di tengah, tapi tidak dipaksa stretch */
-            align-items: flex-start; 
-            justify-content: center;
-            padding: 50px;
-        }
-
-        /* --- KANVAS FLYER (ISOLASI STYLE) --- */
-        #flyer-canvas {
-            /* Pastikan default display block agar tidak berantakan */
-            display: block; 
-            margin: auto; /* Center horizontal */
-            background: white;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            /* Reset Text Align agar tidak ikut parent */
-            text-align: left; 
-            /* Cursor Text */
-            cursor: text;
-            /* Outline biar user tau area kerja */
-            outline: 2px dashed rgba(0,0,0,0.1);
-        }
-        #flyer-canvas:hover { outline: 2px dashed #4f46e5; }
-
-        /* Loader */
-        .loading { font-size: 12px; color: #666; margin-top: 5px; text-align: center; display: none;}
-    </style>
+        .btn { padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; color: white; }
+        .btn-primary { background: var(--primary); }
+        .btn-save { background: #059669; }
+        
+        .preview-area { flex: 1; background: #e5e7eb; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 40px; }
+        #flyer-canvas { background: white; box-shadow: 0 20px 50px rgba(0,0,0,0.15); display: inline-block; min-width: 100px; min-height: 100px; }
+        
+        @media (max-width: 800px) { body { flex-direction: column; overflow: auto; height: auto; } .sidebar { width: 100%; height: auto; } .preview-area { min-height: 500px; } }
+        #loader { position: fixed; inset: 0; background: white; z-index: 999; display: flex; align-items: center; justify-content: center; }
+    </script>
 </head>
 <body>
 
-    <div class="editor-panel">
-        <h3>🛠️ Source Code Editor</h3>
-        <p style="font-size:11px; color:#888; margin-bottom:10px;">
-            Paste kode HTML dari Gemini di sini. Pastikan kode memiliki <code>width</code> & <code>height</code> fix (px).
-        </p>
-        
-        <textarea id="htmlInput" placeholder="<div style='width:500px...'>"></textarea>
+    <div id="loader"><h3>Menghubungkan ke Database...</h3></div>
 
-        <button class="btn btn-update" onclick="renderPreview()">🔄 Render Preview</button>
-        <div id="msg" class="loading">Memproses...</div>
-        <button class="btn btn-download" id="btnDL" onclick="downloadFlyer()">⬇️ Download Gambar</button>
+    <div class="sidebar">
+        <div class="header">
+            <h1 id="app-title">Flyer App</h1>
+            <span id="role-badge" class="badge badge-user">USER MODE</span>
+        </div>
+
+        <div id="admin-panel">
+            <p style="font-size:12px">Paste HTML (Inline CSS) dari Gemini:</p>
+            <textarea id="htmlInput" class="editor-box"></textarea>
+            <button class="btn btn-save" onclick="saveTemplate()">💾 Simpan Desain</button>
+            <button class="btn btn-primary" onclick="renderAdminPreview()" style="background:#64748b">🔄 Test Preview</button>
+        </div>
+
+        <div id="user-panel">
+            <div id="dynamic-form"></div>
+            <button class="btn btn-primary" id="btnDL" onclick="downloadImage()">⬇️ Download Gambar</button>
+        </div>
     </div>
 
     <div class="preview-area">
-        <div id="flyer-canvas" contenteditable="true" spellcheck="false">
-            </div>
+        <div id="flyer-canvas"></div>
     </div>
 
     <script>
-        // --- LOGIC ---
-        // Deteksi apakah running di Apps Script atau GitHub Pages
-        const isGAS = (typeof google !== 'undefined' && google.script);
-        // GANTI URL INI JIKA PAKAI GITHUB PAGES
+        // --- KONFIGURASI PENTING ---
+        // Masukkan URL Deployment Google Apps Script Anda di sini
         const API_URL = "https://script.google.com/macros/s/AKfycbzEd4YG1VlOFcbgVip6XrOe4quWAImkvcOvzVerTYavMkiuU1F6nSmoxd56b7DbEw7W/exec"; 
 
+        let RAW_TEMPLATE = "";
+
         window.onload = function() {
-            if(isGAS) {
-                google.script.run.withSuccessHandler(initApp).getAppSettings();
-            } else {
-                // Dummy Data untuk tes lokal/GitHub
-                initApp({ 
-                    JudulDefault: "GRAND OPENING", 
-                    WarnaBackground: "linear-gradient(to right, #141e30, #243b55)",
-                    FooterText: "Komunitas Kita"
+            // Ambil Parameter URL ?mode=12345
+            const urlParams = new URLSearchParams(window.location.search);
+            const modeParam = urlParams.get('mode');
+
+            // 1. FETCH DATA DARI GAS (GET)
+            fetch(API_URL + "?action=getSettings")
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('app-title').innerText = data.JudulApp;
+
+                    // Cek Apakah Admin?
+                    if (modeParam && modeParam === data.PasscodeAdmin) {
+                        initAdmin(data.TemplateAktif);
+                    } else {
+                        initUser(data.TemplateAktif);
+                    }
+                    document.getElementById('loader').style.display = 'none';
+                })
+                .catch(err => {
+                    alert("Gagal koneksi ke Database. Cek Console.");
+                    console.error(err);
                 });
-            }
         };
 
-        function initApp(settings) {
-            // TEMPLATE DEFAULT YANG STABIL (FIXED WIDTH)
-            // Kunci agar tidak berantakan: width: 500px (Bukan %)
-            const template = `
-<div style="width: 500px; height: 700px; background: ${settings.WarnaBackground}; font-family: 'Segoe UI', sans-serif; position: relative; overflow: hidden; color: white;">
-    
-    <div style="padding: 40px; text-align: center;">
-        <div style="font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; opacity: 0.8;">Invitation</div>
-        <h1 style="margin: 0; font-size: 40px; line-height: 1.2; text-shadow: 2px 2px 0px rgba(0,0,0,0.2);">${settings.JudulDefault}</h1>
-        <div style="width: 50px; height: 4px; background: #fbbf24; margin: 20px auto;"></div>
-    </div>
-
-    <div style="background: rgba(255,255,255,0.1); padding: 40px 20px; text-align: center; margin: 20px 0;">
-        <p style="margin: 0 0 10px 0; font-style: italic; opacity: 0.8;">Kepada Yth,</p>
-        <h2 style="font-size: 45px; margin: 0; font-weight: 800; color: #fbbf24; text-transform: uppercase;">NAMA<br>PESERTA</h2>
-    </div>
-
-    <div style="position: absolute; bottom: 0; width: 100%; padding: 20px; text-align: center; font-size: 12px; background: rgba(0,0,0,0.3);">
-        ${settings.FooterText}
-    </div>
-</div>`;
-            
-            document.getElementById('htmlInput').value = template;
-            renderPreview();
+        // --- ADMIN FUNCTIONS ---
+        function initAdmin(template) {
+            document.getElementById('admin-panel').style.display = 'flex';
+            document.getElementById('role-badge').className = 'badge badge-admin';
+            document.getElementById('role-badge').innerText = 'ADMIN CREATOR';
+            if(template) {
+                document.getElementById('htmlInput').value = template;
+                renderAdminPreview();
+            }
         }
 
-        function renderPreview() {
-            var code = document.getElementById('htmlInput').value;
-            var canvas = document.getElementById('flyer-canvas');
-            
-            // Render HTML
-            canvas.innerHTML = code;
-            
-            // PENTING: 
-            // Kita reset display style canvas ke block agar mengikuti ukuran div di dalamnya
-            canvas.style.display = "inline-block";
+        function saveTemplate() {
+            const code = document.getElementById('htmlInput').value;
+            const btn = document.querySelector('.btn-save');
+            btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
+
+            // KIRIM DATA KE GAS (POST)
+            // Gunakan no-cors atau text/plain untuk bypass CORS preflight sederhana
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: "saveTemplate", payload: code })
+            }).then(res => {
+                alert("Desain berhasil disimpan! Semua user akan melihat update ini.");
+                btn.innerText = "💾 Simpan Desain"; btn.disabled = false;
+            });
         }
 
-        function downloadFlyer() {
-            var element = document.getElementById("flyer-canvas");
-            var btn = document.getElementById("btnDL");
-            var msg = document.getElementById("msg");
+        function renderAdminPreview() {
+            document.getElementById('flyer-canvas').innerHTML = document.getElementById('htmlInput').value;
+        }
 
-            btn.disabled = true; msg.style.display = "block";
+        // --- USER FUNCTIONS ---
+        function initUser(template) {
+            document.getElementById('user-panel').style.display = 'flex';
+            RAW_TEMPLATE = template || "<div style='padding:20px'>Belum ada desain.</div>";
+            document.getElementById('flyer-canvas').innerHTML = RAW_TEMPLATE;
+            generateForm(RAW_TEMPLATE);
+        }
 
-            // Matikan edit mode agar kursor hilang
-            element.setAttribute("contenteditable", "false");
+        function generateForm(html) {
+            const container = document.getElementById('dynamic-form');
+            container.innerHTML = "";
+            const regex = /{{\s*(.*?)\s*}}/g;
+            let match;
+            const labels = new Set();
 
-            html2canvas(element, {
-                scale: 2, // HD Quality
-                useCORS: true,
-                backgroundColor: null // Transparan background support
-            }).then(canvas => {
-                var link = document.createElement('a');
-                link.download = 'Flyer-Result.png';
+            while ((match = regex.exec(html)) !== null) {
+                const label = match[1];
+                if(!labels.has(label)) {
+                    labels.add(label);
+                    const div = document.createElement('div');
+                    div.className = 'form-group';
+                    div.innerHTML = `<label>${label}</label><input type="text" data-target="${label}" onkeyup="updateLive()" placeholder="Isi ${label}...">`;
+                    container.appendChild(div);
+                }
+            }
+            if(labels.size === 0) container.innerHTML = "<p>Tidak ada data yang perlu diisi.</p>";
+        }
+
+        function updateLive() {
+            let html = RAW_TEMPLATE;
+            document.querySelectorAll('#dynamic-form input').forEach(input => {
+                const target = input.getAttribute('data-target');
+                const val = input.value || target;
+                html = html.replace(new RegExp("{{\\s*" + target + "\\s*}}", "g"), val);
+            });
+            document.getElementById('flyer-canvas').innerHTML = html;
+        }
+
+        function downloadImage() {
+            const el = document.getElementById("flyer-canvas");
+            const btn = document.getElementById("btnDL");
+            btn.innerText = "⏳ Proses..."; btn.disabled = true;
+
+            html2canvas(el, { scale: 2, useCORS: true }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Flyer-Saya.png';
                 link.href = canvas.toDataURL("image/png");
                 link.click();
                 
-                // Simpan Log
-                var logData = element.innerText;
-                if(isGAS) google.script.run.saveLog(logData);
+                // LOG USER (Fire and forget)
+                fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "saveLog", payload: "User Download" })
+                });
 
-                // Reset
-                element.setAttribute("contenteditable", "true");
-                btn.disabled = false; msg.style.display = "none";
+                btn.innerText = "⬇️ Download Gambar"; btn.disabled = false;
             });
         }
     </script>
