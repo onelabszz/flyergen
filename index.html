@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultimate Flyer Generator - Mobile Optimized</title>
+    <title>Ultimate Flyer Generator - Mobile Fix</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -24,7 +24,7 @@
             overflow: hidden; 
         }
 
-        /* --- SIDEBAR --- */
+        /* --- SIDEBAR (DESKTOP) --- */
         .sidebar { 
             width: var(--sidebar-w); background: white; display: flex; flex-direction: column; 
             border-right: 1px solid var(--border); z-index: 20; 
@@ -35,7 +35,7 @@
             padding: 15px 20px; border-bottom: 1px solid var(--border);
             display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
             background: rgba(255,255,255,0.95); backdrop-filter: blur(5px);
-            position: sticky; top: 0; z-index: 50; /* Header lengket di HP */
+            position: sticky; top: 0; z-index: 50;
         }
         .app-brand h1 { font-size: 16px; margin: 0; font-weight: 800; color: var(--dark); }
         .app-brand span { font-size: 10px; color: #64748b; letter-spacing: 0.5px; }
@@ -91,7 +91,7 @@
         .btn-outline { border: 1px solid var(--border); background: white; color: #475569; }
         .btn-save { background: #059669; color: white; grid-column: span 2; }
 
-        /* --- PREVIEW AREA --- */
+        /* --- PREVIEW AREA (DESKTOP) --- */
         .preview-area { 
             flex: 1; background: #e2e8f0; display: flex; 
             align-items: flex-start; justify-content: center; 
@@ -119,39 +119,43 @@
 
         /* --- MOBILE RESPONSIVE (LAYOUT FIX) --- */
         @media (max-width: 900px) { 
-            /* 1. Body jadi Column biasa & Scrollable */
             body { 
                 flex-direction: column; 
-                overflow: auto; /* Scroll window aktif */
+                overflow: auto; 
                 height: auto; 
             } 
 
-            /* 2. PREVIEW AREA: Pindah ke urutan PERTAMA (Atas) */
+            /* Preview Area: Pindah ke Atas */
             .preview-area { 
-                order: 1; /* Prioritas 1 */
-                min-height: 400px; /* Ruang untuk flyer */
-                padding: 20px; 
-                align-items: flex-start; 
-                overflow: hidden; 
-                border-bottom: 1px solid #cbd5e1;
+                order: 1; 
+                display: block; /* Agar height bisa diatur manual oleh JS */
+                width: 100%;
+                padding: 20px 0; 
                 background: #e2e8f0;
+                overflow: hidden; 
+                /* min-height dihapus agar tidak memaksa panjang */
             }
 
-            /* 3. SIDEBAR: Pindah ke urutan KEDUA (Bawah) */
+            /* Sidebar: Pindah ke Bawah */
             .sidebar { 
-                order: 2; /* Prioritas 2 */
+                order: 2; 
                 width: 100%; 
                 height: auto; 
                 border-right: none; 
-                box-shadow: none; 
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.05); 
                 border-bottom: none;
-                overflow: visible; /* Biarkan form memanjang ke bawah */
+                overflow: visible; 
             } 
             
-            /* Panel di dalam sidebar agar tidak ada scroll ganda */
             .panel { 
                 overflow: visible; 
                 height: auto;
+            }
+
+            #flyer-canvas {
+                /* Memastikan canvas di tengah secara horizontal */
+                margin-left: auto;
+                margin-right: auto;
             }
         }
     </style>
@@ -175,7 +179,7 @@
         <div class="header">
             <div class="app-brand">
                 <h1>Flyer Creator Pro</h1>
-                <span>Versi 2.1 (Layout Mobile Fixed)</span>
+                <span>Versi 2.2 (Mobile Space Fix)</span>
             </div>
             <span id="role-badge" class="badge badge-user">LOADING</span>
         </div>
@@ -220,7 +224,7 @@
         <div id="user-panel" class="panel">
             <div style="background:#f0f9ff; border:1px dashed #bae6fd; padding:15px; border-radius:8px; margin-bottom:20px;">
                 <h4 style="margin:0 0 5px 0; font-size:13px; color:#0284c7;">🎨 Kustomisasi Desain</h4>
-                <p style="margin:0; font-size:11px; color:#0c4a6e;">Lihat preview di atas, isi data di bawah ini.</p>
+                <p style="margin:0; font-size:11px; color:#0c4a6e;">Data yang Anda isi akan muncul di gambar di atas.</p>
             </div>
 
             <div class="form-group">
@@ -321,7 +325,7 @@
                         initUser(data.TemplateAktif);
                     }
                     document.getElementById('loader').style.display = 'none';
-                    fitPreviewToScreen(); 
+                    setTimeout(fitPreviewToScreen, 100); 
                 })
                 .catch(err => {
                     console.error(err);
@@ -330,24 +334,43 @@
                 });
         };
 
-        // --- MOBILE AUTO ZOOM LOGIC ---
+        // --- MOBILE AUTO ZOOM LOGIC (THE FIX) ---
         function fitPreviewToScreen() {
             const container = document.getElementById('preview-container');
             const canvas = document.getElementById('flyer-canvas');
             
+            // Cek apakah di mobile (lebar layar < 900px)
             if (window.innerWidth < 900 && canvas) {
+                // 1. Reset ke normal
                 canvas.style.transform = 'none';
+                container.style.height = 'auto'; 
                 
-                const screenWidth = container.clientWidth - 40; 
+                // 2. Hitung Skala
+                const screenWidth = container.clientWidth; 
                 const flyerWidth = canvas.scrollWidth;
+                const safeZone = 30; // Jarak aman kiri-kanan
                 
-                if (flyerWidth > screenWidth) {
-                    const scale = screenWidth / flyerWidth;
+                // Jika flyer lebih besar dari layar
+                if (flyerWidth > (screenWidth - safeZone)) {
+                    const scale = (screenWidth - safeZone) / flyerWidth;
+                    
+                    // 3. Terapkan Zoom
                     canvas.style.transform = `scale(${scale})`;
-                    container.style.paddingBottom = "20px";
+                    canvas.style.transformOrigin = 'top center'; // Zoom dari atas
+                    
+                    // 4. POTONG SPACE KOSONG (Fix Jarak Panjang)
+                    // Kita hitung tinggi visual flyer setelah zoom, lalu set tinggi container
+                    const actualHeight = canvas.scrollHeight * scale;
+                    
+                    // Set tinggi container pas dengan tinggi flyer (+sedikit margin)
+                    container.style.height = (actualHeight + 30) + "px";
                 }
             } else {
-                if(canvas) canvas.style.transform = 'none';
+                // Desktop Mode: Reset
+                if(canvas) {
+                    canvas.style.transform = 'none';
+                    container.style.height = 'auto'; 
+                }
             }
         }
         window.addEventListener('resize', fitPreviewToScreen);
