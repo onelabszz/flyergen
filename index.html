@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Flyer Generator Pro</title>
+    <title>Flyer Generator Pro v2.3</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -12,21 +12,15 @@
     
     <style>
         /* --- CSS VARIABLES --- */
-        :root { 
-            --primary: #4f46e5; --dark: #0f172a; --bg: #f8fafc; 
-            --sidebar-w: 420px; --border: #e2e8f0;
-        }
+        :root { --primary: #4f46e5; --dark: #0f172a; --bg: #f8fafc; --sidebar-w: 420px; --border: #e2e8f0; }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        
         body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); height: 100vh; display: flex; color: #334155; overflow: hidden; }
 
         /* --- SIDEBAR --- */
         .sidebar { width: var(--sidebar-w); background: white; display: flex; flex-direction: column; border-right: 1px solid var(--border); z-index: 20; box-shadow: 10px 0 30px rgba(0,0,0,0.03); height: 100vh; flex-shrink: 0; }
-
         .header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); position: sticky; top: 0; z-index: 50; }
         .app-brand h1 { font-size: 16px; margin: 0; font-weight: 800; color: var(--dark); }
         .app-brand span { font-size: 10px; color: #64748b; letter-spacing: 0.5px; }
-        
         .badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 700; }
         .badge-user { background: #e0f2fe; color: #0284c7; }
         .badge-admin { background: #dcfce7; color: #166534; }
@@ -35,46 +29,42 @@
         .panel { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; }
         .active-panel { display: flex; }
 
-        /* --- ADMIN TOOLS --- */
+        /* --- TOOLS --- */
         .tool-section { margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
         .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px; display: block; }
-
         .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
         .preset-btn { padding: 10px; border: 1px solid var(--border); background: #f8fafc; border-radius: 8px; cursor: pointer; font-size: 11px; text-align: center; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .preset-btn:hover { border-color: var(--primary); color: var(--primary); background: #eef2ff; }
         .preset-btn i { font-size: 20px; }
 
+        /* INPUTS */
         .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
         .input-box { flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
-        
         .btn-icon { padding: 8px 12px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap; }
         .btn-icon:hover { background: #e2e8f0; }
-
         .code-editor { flex-grow: 1; min-height: 200px; width: 100%; background: #1e293b; color: #cbd5e1; border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5; border: none; resize: none; margin-bottom: 10px; }
 
-        /* --- USER FORM --- */
+        /* --- USER UI --- */
         .form-group { margin-bottom: 15px; }
         .form-group label { font-size: 12px; font-weight: 600; color: var(--dark); display: block; margin-bottom: 6px; }
         .form-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; transition: 0.2s; background: white; }
         .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
         input[type="color"] { height: 40px; width: 100%; padding: 2px; cursor: pointer; border-radius: 6px; border: 1px solid var(--border); }
 
-        /* --- ACTION BAR --- */
+        /* --- BUTTONS --- */
         .action-bar { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border); display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
         .btn { padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .btn-primary { background: var(--primary); color: white; grid-column: span 2; }
-        .btn-primary:hover { background: #4338ca; }
-        .btn-outline { border: 1px solid var(--border); background: white; color: #475569; }
         .btn-save { background: #059669; color: white; grid-column: span 2; }
+        .btn-outline { border: 1px solid var(--border); background: white; color: #475569; }
 
-        /* --- PREVIEW AREA (DESKTOP) --- */
-        .preview-area { flex: 1; background: #e2e8f0; display: flex; align-items: flex-start; justify-content: center; overflow: auto; padding: 40px; background-image: radial-gradient(#94a3b8 1px, transparent 1px); background-size: 24px 24px; position: relative; }
+        /* --- PREVIEW --- */
+        .preview-area { flex: 1; background: #e2e8f0; display: flex; align-items: flex-start; justify-content: center; overflow: auto; padding: 40px; position: relative; }
         #flyer-canvas { background: white; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); min-width: 100px; min-height: 100px; transform-origin: top center; transition: transform 0.3s ease-out; margin: 0 auto; }
 
-        /* --- MODAL --- */
+        /* --- MODAL & LOADER --- */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal-content { background: white; padding: 25px; border-radius: 16px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 20px 25px rgba(0,0,0,0.1); }
-        
+        .modal-content { background: white; padding: 25px; border-radius: 16px; width: 90%; max-width: 320px; text-align: center; }
         #loader { position: fixed; inset: 0; background: white; z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { width: 40px; height: 40px; border: 4px solid #f1f5f9; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -83,9 +73,8 @@
         @media (max-width: 900px) { 
             body { flex-direction: column; overflow: auto; height: auto; } 
             .preview-area { order: 1; display: block; width: 100%; padding: 20px 0; background: #e2e8f0; overflow: hidden; }
-            .sidebar { order: 2; width: 100%; height: auto; border-right: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-bottom: none; overflow: visible; z-index:10; } 
+            .sidebar { order: 2; width: 100%; height: auto; border-right: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); overflow: visible; z-index:10; } 
             .panel { overflow: visible; height: auto; }
-            #flyer-canvas { margin: 0 auto; transform-origin: top center; }
         }
     </style>
 </head>
@@ -123,15 +112,13 @@
             <div class="tool-section">
                 <span class="section-title">2. Fitur Dinamis</span>
                 <div class="input-row">
-                    <input type="text" id="varInput" class="input-box" placeholder="Label Teks (ex: NAMA)" onkeypress="handleEnter(event, 'var')">
+                    <input type="text" id="varInput" class="input-box" placeholder="Label Teks (ex: HARGA)" onkeypress="handleEnter(event, 'var')">
                     <button class="btn-icon" onclick="addVariable()"><i class="ph ph-text-t"></i> Add Text</button>
                 </div>
-                
                 <div class="input-row">
                     <input type="text" id="imgInput" class="input-box" placeholder="Link Gambar (https://...)" onkeypress="handleEnter(event, 'img')">
                     <button class="btn-icon" onclick="insertImage()"><i class="ph ph-image"></i> Add Img</button>
                 </div>
-
                 <div class="input-row">
                     <button class="btn-icon" style="width:100%" onclick="insertQR()"><i class="ph ph-qr-code"></i> Sisipkan Tempat QR</button>
                 </div>
@@ -149,7 +136,7 @@
         <div id="user-panel" class="panel">
             <div style="background:#f0f9ff; border:1px dashed #bae6fd; padding:15px; border-radius:8px; margin-bottom:20px;">
                 <h4 style="margin:0 0 5px 0; font-size:13px; color:#0284c7;">🎨 Kustomisasi Desain</h4>
-                <p style="margin:0; font-size:11px; color:#0c4a6e;">Data yang Anda isi akan muncul di gambar di atas.</p>
+                <p style="margin:0; font-size:11px; color:#0c4a6e;">Isi data di bawah, preview ada di atas.</p>
             </div>
             <div class="form-group">
                 <label>Tema Warna</label>
@@ -172,17 +159,15 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbzEd4YG1VlOFcbgVip6XrOe4quWAImkvcOvzVerTYavMkiuU1F6nSmoxd56b7DbEw7W/exec";
         let RAW_TEMPLATE = "";
         
-        // --- PRESETS ---
         const PRESETS = {
             promo: `<div style="width:400px; height:550px; background:white; position:relative; overflow:hidden; border:1px solid #eee;">
     <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=400&q=80" style="width:100%; height:200px; object-fit:cover;">
-    <div style="position:absolute; top:20px; left:20px; background:var(--theme-color); color:white; padding:5px 15px; font-weight:bold; font-size:12px;">SPECIAL OFFER</div>
+    <div style="position:absolute; top:20px; left:20px; background:var(--theme-color); color:white; padding:5px 15px; font-weight:bold; font-size:12px;">SPECIAL</div>
     <div style="text-align:center; margin-top:30px; padding:20px;">
         <h2 style="color:var(--theme-color); font-size:52px; margin:0;">{{DISKON}}%</h2>
         <h3 style="color:#333; margin:10px 0;">{{NAMA_PRODUK}}</h3>
         <p style="color:#666; font-size:13px;">Promo terbatas. Jangan sampai kehabisan!</p>
         <div style="margin:20px auto;">{{QR_CODE}}</div>
-        <small style="color:#999; font-size:10px;">Scan untuk info</small>
     </div>
 </div>`,
             event: `<div style="width:400px; height:600px; background:#111; color:white; font-family:sans-serif; padding:30px; display:flex; flex-direction:column;">
@@ -190,25 +175,22 @@
         <span style="color:var(--theme-color); font-size:12px; letter-spacing:2px; font-weight:bold;">WEBINAR</span>
         <h1 style="font-size:36px; margin:15px 0;">{{JUDUL_ACARA}}</h1>
     </div>
-    <img src="https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&w=150&h=150&q=80" style="width:100px; height:100px; border-radius:50%; border:3px solid var(--theme-color); margin:30px 0;">
-    <div>
+    <div style="margin:auto 0;">
         <p style="color:#888; font-size:12px;">SPEAKER:</p>
         <h3 style="font-size:20px;">{{PEMBICARA}}</h3>
     </div>
-    <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center; background:#222; padding:15px; border-radius:8px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#222; padding:15px; border-radius:8px;">
         <div><p style="margin:0; font-size:12px; color:#aaa;">TANGGAL</p><p style="margin:5px 0 0 0; font-weight:bold;">{{TANGGAL}}</p></div>
         <div>{{QR_CODE}}</div>
     </div>
 </div>`,
             cert: `<div style="width:800px; height:560px; background:white; padding:40px; border:15px solid var(--theme-color); font-family:serif; text-align:center; display:flex; flex-direction:column; justify-content:center;">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Laurel_wreath.svg/1024px-Laurel_wreath.svg.png" style="width:80px; margin:0 auto 10px auto; opacity:0.5;">
     <h1 style="font-size:50px; color:var(--theme-color); margin:0;">SERTIFIKAT</h1>
     <p style="font-size:16px; color:#888; letter-spacing:3px; margin-top:10px;">OF APPRECIATION</p>
     <div style="margin:30px 0;">
         <p style="font-size:16px; color:#555;">Diberikan Kepada:</p>
         <h2 style="font-size:42px; margin:10px 0; border-bottom:1px solid #ddd; display:inline-block; padding:0 40px 10px 40px;">{{NAMA_PESERTA}}</h2>
     </div>
-    <p style="font-size:16px; color:#666;">Atas partisipasinya dalam acara:</p>
     <h3 style="font-size:24px; color:#333; margin:10px 0;">{{NAMA_ACARA}}</h3>
     <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:30px; padding:0 40px;">
         <div style="text-align:center;">{{QR_CODE}}<p style="font-size:9px; color:#999;">VERIFIKASI</p></div>
@@ -217,7 +199,6 @@
 </div>`
         };
 
-        // --- INIT ---
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const modeParam = urlParams.get('mode');
@@ -250,7 +231,6 @@
         }
         window.addEventListener('resize', fitPreviewToScreen);
 
-        // --- ADMIN ---
         function initAdmin(savedData) {
             document.getElementById('admin-panel').classList.add('active-panel');
             document.getElementById('role-badge').className = 'badge badge-admin';
@@ -280,7 +260,6 @@
         function insertImage() {
             const url = document.getElementById('imgInput').value.trim();
             if(!url) { showMsg("Info", "Masukkan link gambar terlebih dahulu!"); return; }
-            // Template HTML Gambar yang rapi
             const imgTag = `<img src="${url}" style="width:100%; max-width:200px; display:block; margin:10px auto; border-radius:8px;">`;
             insertAtCursor(imgTag);
             document.getElementById('imgInput').value = "";
@@ -318,7 +297,6 @@
             }
         }
 
-        // --- USER ---
         function initUser(template) {
             document.getElementById('user-panel').classList.add('active-panel');
             document.getElementById('role-badge').innerText = 'PUBLIK';
