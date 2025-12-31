@@ -2,252 +2,516 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Flyer Generator Pro v2.3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flyer Generator Pro (Bootstrap 5)</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-    
+
     <style>
-        /* --- CSS VARIABLES --- */
-        :root { --primary: #4f46e5; --dark: #0f172a; --bg: #f8fafc; --sidebar-w: 420px; --border: #e2e8f0; }
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); height: 100vh; display: flex; color: #334155; overflow: hidden; }
+        :root {
+            --primary-color: #4f46e5;
+            --sidebar-width: 400px;
+            --bg-canvas: #e9ecef;
+        }
 
-        /* --- SIDEBAR --- */
-        .sidebar { width: var(--sidebar-w); background: white; display: flex; flex-direction: column; border-right: 1px solid var(--border); z-index: 20; box-shadow: 10px 0 30px rgba(0,0,0,0.03); height: 100vh; flex-shrink: 0; }
-        .header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); position: sticky; top: 0; z-index: 50; }
-        .app-brand h1 { font-size: 16px; margin: 0; font-weight: 800; color: var(--dark); }
-        .app-brand span { font-size: 10px; color: #64748b; letter-spacing: 0.5px; }
-        .badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 700; }
-        .badge-user { background: #e0f2fe; color: #0284c7; }
-        .badge-admin { background: #dcfce7; color: #166534; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-canvas);
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+        }
 
-        /* --- PANELS --- */
-        .panel { display: none; flex: 1; flex-direction: column; padding: 20px; overflow-y: auto; }
-        .active-panel { display: flex; }
+        /* Layout Structure */
+        .wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
 
-        /* --- TOOLS --- */
-        .tool-section { margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
-        .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px; display: block; }
-        .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
-        .preset-btn { padding: 10px; border: 1px solid var(--border); background: #f8fafc; border-radius: 8px; cursor: pointer; font-size: 11px; text-align: center; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .preset-btn:hover { border-color: var(--primary); color: var(--primary); background: #eef2ff; }
-        .preset-btn i { font-size: 20px; }
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #dee2e6;
+            flex-shrink: 0;
+            z-index: 100;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.05);
+            transition: margin 0.3s ease;
+        }
 
-        /* INPUTS */
-        .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
-        .input-box { flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
-        .btn-icon { padding: 8px 12px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 12px; white-space: nowrap; }
-        .btn-icon:hover { background: #e2e8f0; }
-        .code-editor { flex-grow: 1; min-height: 200px; width: 100%; background: #1e293b; color: #cbd5e1; border-radius: 8px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5; border: none; resize: none; margin-bottom: 10px; }
+        .sidebar-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f1f3f5;
+            background: rgba(255,255,255,0.95);
+        }
 
-        /* --- USER UI --- */
-        .form-group { margin-bottom: 15px; }
-        .form-group label { font-size: 12px; font-weight: 600; color: var(--dark); display: block; margin-bottom: 6px; }
-        .form-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; transition: 0.2s; background: white; }
-        .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
-        input[type="color"] { height: 40px; width: 100%; padding: 2px; cursor: pointer; border-radius: 6px; border: 1px solid var(--border); }
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
 
-        /* --- BUTTONS --- */
-        .action-bar { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border); display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
-        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .btn-primary { background: var(--primary); color: white; grid-column: span 2; }
-        .btn-save { background: #059669; color: white; grid-column: span 2; }
-        .btn-outline { border: 1px solid var(--border); background: white; color: #475569; }
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #f1f3f5;
+            background: #f8f9fa;
+        }
 
-        /* --- PREVIEW --- */
-        .preview-area { flex: 1; background: #e2e8f0; display: flex; align-items: flex-start; justify-content: center; overflow: auto; padding: 40px; position: relative; }
-        #flyer-canvas { background: white; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); min-width: 100px; min-height: 100px; transform-origin: top center; transition: transform 0.3s ease-out; margin: 0 auto; }
+        /* Main Preview Area */
+        .main-content {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-        /* --- MODAL & LOADER --- */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal-content { background: white; padding: 25px; border-radius: 16px; width: 90%; max-width: 320px; text-align: center; }
-        #loader { position: fixed; inset: 0; background: white; z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f1f5f9; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .preview-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            padding: 40px;
+            background-image: radial-gradient(#ced4da 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
 
-        /* --- MOBILE RESPONSIVE --- */
-        @media (max-width: 900px) { 
-            body { flex-direction: column; overflow: auto; height: auto; } 
-            .preview-area { order: 1; display: block; width: 100%; padding: 20px 0; background: #e2e8f0; overflow: hidden; }
-            .sidebar { order: 2; width: 100%; height: auto; border-right: none; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); overflow: visible; z-index:10; } 
-            .panel { overflow: visible; height: auto; }
+        /* The Flyer Canvas */
+        #flyer-canvas {
+            background: white;
+            box-shadow: 0 20px 50px -12px rgba(0,0,0,0.25);
+            margin: auto;
+            transform-origin: center center; /* Changed from top center for better centering */
+            transition: transform 0.2s ease;
+            /* Default size to prevent collapse before content loads */
+            min-width: 400px; 
+            min-height: 400px;
+        }
+
+        /* Custom UI Elements */
+        .code-editor {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            background-color: #212529;
+            color: #f8f9fa;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            resize: none;
+            width: 100%;
+            min-height: 200px;
+        }
+
+        .btn-preset {
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            border: 1px solid #dee2e6;
+            background: #fff;
+            color: #6c757d;
+            transition: all 0.2s;
+        }
+        
+        .btn-preset:hover {
+            border-color: var(--primary-color);
+            background-color: #eef2ff;
+            color: var(--primary-color);
+        }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* Loader */
+        #loader {
+            position: fixed; top:0; left:0; right:0; bottom:0;
+            background: white; z-index: 9999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            body { height: auto; overflow: auto; }
+            .wrapper { flex-direction: column-reverse; height: auto; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-top: 1px solid #dee2e6; }
+            .main-content { height: 60vh; min-height: 400px; }
+            .preview-area { align-items: flex-start; padding-top: 20px; }
+            #flyer-canvas { transform-origin: top center; margin-top: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="loader"><div class="spinner"></div><small style="color:#64748b">Loading...</small></div>
-
-    <div id="msgModal" class="modal">
-        <div class="modal-content">
-            <h3 id="mTitle" style="margin:0 0 10px 0;">Info</h3>
-            <p id="mDesc" style="font-size:13px; color:#64748b; margin-bottom:20px;">Pesan</p>
-            <button onclick="document.getElementById('msgModal').style.display='none'" class="btn btn-primary">OK</button>
-        </div>
+    <!-- Loading Screen -->
+    <div id="loader">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <div class="text-muted fw-bold small">Memuat Aplikasi...</div>
     </div>
 
-    <div class="sidebar">
-        <div class="header">
-            <div class="app-brand">
-                <h1>Flyer Creator Pro</h1>
-                <span>Versi 2.3 (Image Support)</span>
-            </div>
-            <span id="role-badge" class="badge badge-user">LOADING</span>
-        </div>
+    <!-- Hidden div for QR Generation -->
+    <div id="qr-dump" style="display:none;"></div>
 
-        <div id="admin-panel" class="panel">
-            <div class="tool-section">
-                <span class="section-title">1. Pilih Template</span>
-                <div class="preset-grid">
-                    <div class="preset-btn" onclick="loadPreset('promo')"><i class="ph ph-storefront"></i> Promo</div>
-                    <div class="preset-btn" onclick="loadPreset('event')"><i class="ph ph-microphone-stage"></i> Event</div>
-                    <div class="preset-btn" onclick="loadPreset('cert')"><i class="ph ph-certificate"></i> Sertifikat</div>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-layers-fill text-primary me-2"></i>FlyerPro</h5>
+                    <small class="text-muted" style="font-size: 11px;">Single File v1.0</small>
+                </div>
+                <span class="badge rounded-pill bg-primary" id="role-badge">USER</span>
+            </div>
+
+            <div class="sidebar-content">
+                
+                <!-- ADMIN PANEL -->
+                <div id="admin-panel" class="panel">
+                    <div class="mb-4">
+                        <label class="form-label text-uppercase fw-bold text-muted small" style="font-size: 0.75rem;">1. Pilih Template</label>
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <button class="btn btn-preset w-100 rounded-3" onclick="loadPreset('promo')">
+                                    <i class="bi bi-shop fs-4"></i>
+                                    <span style="font-size: 10px;">Promo</span>
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-preset w-100 rounded-3" onclick="loadPreset('event')">
+                                    <i class="bi bi-calendar-event fs-4"></i>
+                                    <span style="font-size: 10px;">Event</span>
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-preset w-100 rounded-3" onclick="loadPreset('cert')">
+                                    <i class="bi bi-award fs-4"></i>
+                                    <span style="font-size: 10px;">Sertifikat</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-uppercase fw-bold text-muted small" style="font-size: 0.75rem;">2. Tools Editor</label>
+                        
+                        <!-- Add Text Variable -->
+                        <div class="input-group input-group-sm mb-2">
+                            <input type="text" id="varInput" class="form-control" placeholder="Label (ex: HARGA)" onkeypress="handleEnter(event, 'var')">
+                            <button class="btn btn-outline-secondary" type="button" onclick="addVariable()">
+                                <i class="bi bi-plus-lg"></i> Teks
+                            </button>
+                        </div>
+
+                        <!-- Add Image -->
+                        <div class="input-group input-group-sm mb-2">
+                            <input type="text" id="imgInput" class="form-control" placeholder="URL Gambar..." onkeypress="handleEnter(event, 'img')">
+                            <button class="btn btn-outline-secondary" type="button" onclick="insertImage()">
+                                <i class="bi bi-image"></i> Img
+                            </button>
+                        </div>
+
+                        <!-- Add QR -->
+                        <button class="btn btn-sm btn-outline-dark w-100 border-dashed" onclick="insertQR()">
+                            <i class="bi bi-qr-code me-1"></i> Sisipkan Placeholder QR Code
+                        </button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-uppercase fw-bold text-muted small" style="font-size: 0.75rem;">3. Source Code HTML</label>
+                        <textarea id="htmlInput" class="code-editor form-control" spellcheck="false" oninput="syncCodeToCanvas()"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success fw-bold" onclick="saveTemplate()"><i class="bi bi-save me-2"></i>Simpan Template</button>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button class="btn btn-outline-secondary w-100 btn-sm" onclick="downloadHTML('Admin_Template')">Download HTML</button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-secondary w-100 btn-sm" onclick="downloadImage('Master_Design')">Download PNG</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USER PANEL -->
+                <div id="user-panel" class="panel active">
+                    <div class="alert alert-primary bg-primary-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3">
+                        <i class="bi bi-info-circle-fill text-primary me-3 fs-3"></i>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-primary">Kustomisasi</h6>
+                            <small class="text-primary-emphasis">Isi form di bawah untuk mengubah desain secara otomatis.</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Warna Tema</label>
+                        <input type="color" class="form-control form-control-color w-100" id="colorPicker" value="#4f46e5" title="Choose your color" oninput="updateColor(this.value)">
+                    </div>
+
+                    <div id="dynamic-form">
+                        <!-- Inputs will be generated here -->
+                        <div class="text-center text-muted py-4">
+                            <div class="spinner-border spinner-border-sm mb-2"></div>
+                            <p class="small">Memuat form...</p>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-grid gap-2">
+                        <button id="btnDownload" class="btn btn-primary btn-lg fw-bold shadow-sm" onclick="downloadImage('Flyer_Final')">
+                            <i class="bi bi-download me-2"></i>Download Gambar
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="downloadHTML('Flyer_Saya')">
+                            <i class="bi bi-filetype-html me-2"></i>Simpan sebagai HTML
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer / Switcher -->
+            <div class="sidebar-footer d-flex justify-content-between align-items-center">
+                <small class="text-muted">&copy; 2023 FlyerPro</small>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="modeSwitch" onchange="toggleMode(this.checked)">
+                    <label class="form-check-label small fw-bold" for="modeSwitch">Admin Mode</label>
                 </div>
             </div>
+        </aside>
 
-            <div class="tool-section">
-                <span class="section-title">2. Fitur Dinamis</span>
-                <div class="input-row">
-                    <input type="text" id="varInput" class="input-box" placeholder="Label Teks (ex: HARGA)" onkeypress="handleEnter(event, 'var')">
-                    <button class="btn-icon" onclick="addVariable()"><i class="ph ph-text-t"></i> Add Text</button>
-                </div>
-                <div class="input-row">
-                    <input type="text" id="imgInput" class="input-box" placeholder="Link Gambar (https://...)" onkeypress="handleEnter(event, 'img')">
-                    <button class="btn-icon" onclick="insertImage()"><i class="ph ph-image"></i> Add Img</button>
-                </div>
-                <div class="input-row">
-                    <button class="btn-icon" style="width:100%" onclick="insertQR()"><i class="ph ph-qr-code"></i> Sisipkan Tempat QR</button>
-                </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="preview-area" id="preview-container">
+                <div id="flyer-canvas"></div>
             </div>
-
-            <textarea id="htmlInput" class="code-editor" placeholder="Source code HTML..." oninput="syncCodeToCanvas()"></textarea>
-
-            <div class="action-bar">
-                <button class="btn btn-outline" onclick="downloadHTML('Admin_Template')"><i class="ph ph-code"></i> HTML</button>
-                <button class="btn btn-outline" onclick="downloadImage('Master_Design')"><i class="ph ph-image"></i> PNG</button>
-                <button class="btn btn-save" onclick="saveTemplate(this)"><i class="ph ph-floppy-disk"></i> Simpan</button>
-            </div>
-        </div>
-
-        <div id="user-panel" class="panel">
-            <div style="background:#f0f9ff; border:1px dashed #bae6fd; padding:15px; border-radius:8px; margin-bottom:20px;">
-                <h4 style="margin:0 0 5px 0; font-size:13px; color:#0284c7;">🎨 Kustomisasi Desain</h4>
-                <p style="margin:0; font-size:11px; color:#0c4a6e;">Isi data di bawah, preview ada di atas.</p>
-            </div>
-            <div class="form-group">
-                <label>Tema Warna</label>
-                <input type="color" id="colorPicker" value="#4f46e5" oninput="updateColor(this.value)">
-            </div>
-            <div id="dynamic-form"></div>
-            <div class="action-bar">
-                <button class="btn btn-outline" onclick="downloadHTML('Flyer_Saya')"><i class="ph ph-file-html"></i> HTML</button>
-                <button class="btn btn-primary" id="btnDL" onclick="downloadImage('Flyer_Final')"><i class="ph ph-download-simple"></i> Download Gambar</button>
-            </div>
-        </div>
+        </main>
     </div>
 
-    <div class="preview-area" id="preview-container">
-        <div id="qr-generator-dump" style="display:none;"></div>
-        <div id="flyer-canvas"></div>
-    </div>
+    <!-- Bootstrap JS (Optional for Modals, but kept clean mostly) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Main Logic -->
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzEd4YG1VlOFcbgVip6XrOe4quWAImkvcOvzVerTYavMkiuU1F6nSmoxd56b7DbEw7W/exec";
-        let RAW_TEMPLATE = "";
+        /**
+         * GLOBAL CONFIGURATION
+         */
+        // URL Google Script Anda (Opsional: Jika kosong, hanya berjalan di memori browser lokal)
+        const API_URL = ""; 
         
+        let RAW_TEMPLATE = "";
+        let CURRENT_MODE = 'user'; // 'user' or 'admin'
+
+        // Preset Templates (HTML Strings)
         const PRESETS = {
-            promo: `<div style="width:400px; height:550px; background:white; position:relative; overflow:hidden; border:1px solid #eee;">
-    <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=400&q=80" style="width:100%; height:200px; object-fit:cover;">
-    <div style="position:absolute; top:20px; left:20px; background:var(--theme-color); color:white; padding:5px 15px; font-weight:bold; font-size:12px;">SPECIAL</div>
-    <div style="text-align:center; margin-top:30px; padding:20px;">
-        <h2 style="color:var(--theme-color); font-size:52px; margin:0;">{{DISKON}}%</h2>
-        <h3 style="color:#333; margin:10px 0;">{{NAMA_PRODUK}}</h3>
-        <p style="color:#666; font-size:13px;">Promo terbatas. Jangan sampai kehabisan!</p>
-        <div style="margin:20px auto;">{{QR_CODE}}</div>
+            promo: `<div style="width:400px; height:550px; background:white; position:relative; overflow:hidden; border:1px solid #f1f1f1;">
+    <div style="height:220px; overflow:hidden;">
+        <img src="https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=400&q=80" style="width:100%; height:100%; object-fit:cover;">
+    </div>
+    <div style="position:absolute; top:20px; right:20px; background:var(--theme-color); color:white; padding:8px 15px; font-weight:bold; font-size:14px; border-radius:30px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+        BIG SALE
+    </div>
+    <div style="text-align:center; margin-top:-30px; position:relative; z-index:10; padding:0 20px;">
+        <div style="background:white; padding:20px; border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.05);">
+            <h2 style="color:var(--theme-color); font-size:48px; margin:0; font-weight:800; line-height:1;">{{DISKON}}%</h2>
+            <p style="color:#999; margin:0 0 15px 0; font-size:12px; letter-spacing:1px;">OFF THIS WEEK</p>
+            <h3 style="color:#333; margin:0 0 5px 0; font-size:20px;">{{NAMA_PRODUK}}</h3>
+            <p style="color:#666; font-size:13px; margin-bottom:20px;">Penawaran terbatas, jangan lewatkan kesempatan ini.</p>
+            <div style="margin:0 auto; width:100px;">{{QR_CODE}}</div>
+        </div>
+    </div>
+    <div style="text-align:center; padding:20px; color:#aaa; font-size:10px;">
+        www.websiteanda.com
     </div>
 </div>`,
-            event: `<div style="width:400px; height:600px; background:#111; color:white; font-family:sans-serif; padding:30px; display:flex; flex-direction:column;">
-    <div style="border-left: 4px solid var(--theme-color); padding-left:20px;">
-        <span style="color:var(--theme-color); font-size:12px; letter-spacing:2px; font-weight:bold;">WEBINAR</span>
-        <h1 style="font-size:36px; margin:15px 0;">{{JUDUL_ACARA}}</h1>
+
+            event: `<div style="width:400px; height:600px; background:#111; color:white; font-family:'Plus Jakarta Sans', sans-serif; display:flex; flex-direction:column; position:relative;">
+    <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(45deg, var(--theme-color), transparent 70%); opacity:0.2;"></div>
+    <div style="padding:40px; position:relative; z-index:2; flex:1;">
+        <div style="display:inline-block; border:1px solid rgba(255,255,255,0.3); padding:5px 12px; border-radius:20px; font-size:10px; letter-spacing:1px; margin-bottom:20px;">ONLINE WEBINAR</div>
+        <h1 style="font-size:42px; line-height:1.1; margin:0 0 20px 0; font-weight:800;">{{JUDUL_ACARA}}</h1>
+        <p style="color:#ccc; font-size:14px; line-height:1.6;">Pelajari strategi terbaik langsung dari ahlinya dalam sesi eksklusif ini.</p>
+        
+        <div style="margin-top:40px; display:flex; align-items:center; gap:15px;">
+            <div style="width:50px; height:50px; background:#333; border-radius:50%; overflow:hidden;">
+                <img src="https://ui-avatars.com/api/?name=Speaker&background=random" style="width:100%;">
+            </div>
+            <div>
+                <p style="margin:0; font-size:12px; color:#888;">SPEAKER</p>
+                <p style="margin:0; font-weight:bold; font-size:16px;">{{PEMBICARA}}</p>
+            </div>
+        </div>
     </div>
-    <div style="margin:auto 0;">
-        <p style="color:#888; font-size:12px;">SPEAKER:</p>
-        <h3 style="font-size:20px;">{{PEMBICARA}}</h3>
-    </div>
-    <div style="display:flex; justify-content:space-between; align-items:center; background:#222; padding:15px; border-radius:8px;">
-        <div><p style="margin:0; font-size:12px; color:#aaa;">TANGGAL</p><p style="margin:5px 0 0 0; font-weight:bold;">{{TANGGAL}}</p></div>
-        <div>{{QR_CODE}}</div>
+    <div style="background:#222; padding:20px 40px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <p style="margin:0; font-size:11px; color:var(--theme-color); font-weight:bold;">TANGGAL</p>
+            <p style="margin:0; font-size:16px; font-weight:bold;">{{TANGGAL}}</p>
+        </div>
+        <div style="background:white; padding:5px; border-radius:4px;">{{QR_CODE}}</div>
     </div>
 </div>`,
-            cert: `<div style="width:800px; height:560px; background:white; padding:40px; border:15px solid var(--theme-color); font-family:serif; text-align:center; display:flex; flex-direction:column; justify-content:center;">
-    <h1 style="font-size:50px; color:var(--theme-color); margin:0;">SERTIFIKAT</h1>
-    <p style="font-size:16px; color:#888; letter-spacing:3px; margin-top:10px;">OF APPRECIATION</p>
-    <div style="margin:30px 0;">
-        <p style="font-size:16px; color:#555;">Diberikan Kepada:</p>
-        <h2 style="font-size:42px; margin:10px 0; border-bottom:1px solid #ddd; display:inline-block; padding:0 40px 10px 40px;">{{NAMA_PESERTA}}</h2>
-    </div>
-    <h3 style="font-size:24px; color:#333; margin:10px 0;">{{NAMA_ACARA}}</h3>
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:30px; padding:0 40px;">
-        <div style="text-align:center;">{{QR_CODE}}<p style="font-size:9px; color:#999;">VERIFIKASI</p></div>
-        <div style="text-align:center; width:200px;"><div style="border-bottom:1px solid #333; height:40px;"></div><p style="font-size:14px; margin-top:5px;">Panitia</p></div>
+
+            cert: `<div style="width:800px; height:560px; background:#fff; padding:40px; border:10px solid var(--theme-color); position:relative; font-family:'Times New Roman', serif; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+    <div style="position:absolute; top:30px; left:30px; border-top:2px solid var(--theme-color); border-left:2px solid var(--theme-color); width:50px; height:50px;"></div>
+    <div style="position:absolute; bottom:30px; right:30px; border-bottom:2px solid var(--theme-color); border-right:2px solid var(--theme-color); width:50px; height:50px;"></div>
+    
+    <h1 style="font-size:60px; color:var(--theme-color); margin:0; text-transform:uppercase; letter-spacing:5px;">Sertifikat</h1>
+    <p style="font-size:18px; color:#666; margin-top:5px; font-style:italic;">Penghargaan ini diberikan kepada:</p>
+    
+    <h2 style="font-size:48px; margin:20px 0 10px 0; color:#222; border-bottom:1px solid #ddd; padding:0 40px 10px 40px;">{{NAMA_PESERTA}}</h2>
+    
+    <p style="font-size:16px; color:#555; max-width:600px; line-height:1.6;">Atas partisipasi dan dedikasinya yang luar biasa dalam mengikuti kegiatan:</p>
+    <h3 style="font-size:28px; color:var(--theme-color); margin:10px 0 30px 0;">{{NAMA_ACARA}}</h3>
+    
+    <div style="display:flex; justify-content:space-between; width:100%; padding:0 60px; margin-top:30px;">
+        <div style="text-align:center;">
+            {{QR_CODE}}
+            <p style="font-size:10px; color:#999; margin-top:5px;">SCAN VERIFIKASI</p>
+        </div>
+        <div style="text-align:center; min-width:200px;">
+            <div style="height:60px; display:flex; align-items:end; justify-content:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Signature_sample.svg" style="height:40px; opacity:0.6;"></div>
+            <div style="border-top:1px solid #333; margin-top:5px; padding-top:5px;">
+                <p style="margin:0; font-weight:bold;">Ketua Panitia</p>
+            </div>
+        </div>
     </div>
 </div>`
         };
 
+        // --- INITIALIZATION ---
         window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const modeParam = urlParams.get('mode');
-            fetch(API_URL + "?action=getSettings")
-                .then(res => res.json())
-                .then(data => {
-                    if (modeParam && modeParam === data.PasscodeAdmin) { initAdmin(data.TemplateAktif); }
-                    else { initUser(data.TemplateAktif); }
-                    document.getElementById('loader').style.display = 'none';
-                    setTimeout(fitPreviewToScreen, 100); 
-                })
-                .catch(err => {
-                    console.error(err);
-                    document.getElementById('loader').innerHTML = "<p style='color:red'>Offline Mode / Error</p>";
-                });
+            setTimeout(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const modeParam = urlParams.get('mode');
+                
+                // Cek API jika ada, jika tidak gunakan local mode
+                if(API_URL) {
+                    fetch(API_URL + "?action=getSettings")
+                        .then(res => res.json())
+                        .then(data => {
+                            if (modeParam && modeParam === data.PasscodeAdmin) {
+                                toggleMode(true); // Masuk Admin
+                                if(data.TemplateAktif) loadHtmlToCanvas(data.TemplateAktif);
+                                else loadPreset('promo');
+                            } else {
+                                if(data.TemplateAktif) RAW_TEMPLATE = data.TemplateAktif;
+                                else RAW_TEMPLATE = PRESETS.promo;
+                                initUser(RAW_TEMPLATE);
+                            }
+                            finishLoading();
+                        })
+                        .catch(err => {
+                            console.warn("API Error/Offline", err);
+                            useLocalDefault();
+                        });
+                } else {
+                    // Local Mode Default
+                    useLocalDefault();
+                }
+            }, 800); // Fake loading delay for smooth UX
         };
 
-        function fitPreviewToScreen() {
-            const container = document.getElementById('preview-container');
-            const canvas = document.getElementById('flyer-canvas');
-            if (window.innerWidth < 900 && canvas) {
-                canvas.style.transform = 'none'; container.style.height = 'auto'; 
-                const screenWidth = container.clientWidth; const flyerWidth = canvas.scrollWidth; const safeZone = 30; 
-                if (flyerWidth > (screenWidth - safeZone)) {
-                    const scale = (screenWidth - safeZone) / flyerWidth;
-                    canvas.style.transform = `scale(${scale})`; canvas.style.transformOrigin = 'top center'; 
-                    container.style.height = (canvas.scrollHeight * scale + 30) + "px";
-                }
-            } else if(canvas) { canvas.style.transform = 'none'; container.style.height = 'auto'; }
+        function useLocalDefault() {
+            loadPreset('promo'); // Default load
+            finishLoading();
         }
-        window.addEventListener('resize', fitPreviewToScreen);
 
-        function initAdmin(savedData) {
-            document.getElementById('admin-panel').classList.add('active-panel');
-            document.getElementById('role-badge').className = 'badge badge-admin';
-            document.getElementById('role-badge').innerText = 'ADMIN MODE';
-            const canvas = document.getElementById('flyer-canvas');
-            canvas.setAttribute('contenteditable', 'true');
-            canvas.addEventListener('input', () => document.getElementById('htmlInput').value = canvas.innerHTML);
-            if(savedData) { canvas.innerHTML = savedData; document.getElementById('htmlInput').value = savedData; }
-            else { loadPreset('promo'); }
-            setTimeout(fitPreviewToScreen, 100);
+        function finishLoading() {
+            document.getElementById('loader').style.display = 'none';
+            fitPreviewToScreen();
         }
+
+        function toggleMode(isAdmin) {
+            const adminPanel = document.getElementById('admin-panel');
+            const userPanel = document.getElementById('user-panel');
+            const roleBadge = document.getElementById('role-badge');
+            const modeSwitch = document.getElementById('modeSwitch');
+
+            if (isAdmin) {
+                CURRENT_MODE = 'admin';
+                adminPanel.classList.add('active');
+                userPanel.classList.remove('active');
+                roleBadge.className = 'badge rounded-pill bg-danger';
+                roleBadge.innerText = 'ADMIN';
+                modeSwitch.checked = true;
+                
+                // Sync current canvas to editor
+                const currentHtml = document.getElementById('flyer-canvas').innerHTML;
+                document.getElementById('htmlInput').value = currentHtml;
+                makeCanvasEditable(true);
+            } else {
+                CURRENT_MODE = 'user';
+                adminPanel.classList.remove('active');
+                userPanel.classList.add('active');
+                roleBadge.className = 'badge rounded-pill bg-primary';
+                roleBadge.innerText = 'USER';
+                modeSwitch.checked = false;
+
+                // Save whatever was in admin to RAW_TEMPLATE and init user form
+                RAW_TEMPLATE = document.getElementById('htmlInput').value || document.getElementById('flyer-canvas').innerHTML;
+                initUser(RAW_TEMPLATE);
+                makeCanvasEditable(false);
+            }
+        }
+
+        function makeCanvasEditable(isEditable) {
+            const canvas = document.getElementById('flyer-canvas');
+            if(isEditable) {
+                canvas.setAttribute('contenteditable', 'true');
+                // Add listener to sync back to textarea
+                canvas.oninput = function() {
+                    document.getElementById('htmlInput').value = canvas.innerHTML;
+                };
+            } else {
+                canvas.removeAttribute('contenteditable');
+                canvas.oninput = null;
+            }
+        }
+
+        // --- ADMIN FUNCTIONS ---
 
         function loadPreset(type) {
             const code = PRESETS[type];
+            loadHtmlToCanvas(code);
+        }
+
+        function loadHtmlToCanvas(html) {
+            const canvas = document.getElementById('flyer-canvas');
+            canvas.innerHTML = html;
+            // Set default variable for color if exists
+            canvas.style.setProperty('--theme-color', document.getElementById('colorPicker').value);
+            
+            if(CURRENT_MODE === 'admin') {
+                document.getElementById('htmlInput').value = html;
+            } else {
+                RAW_TEMPLATE = html;
+                initUser(html);
+            }
+            
+            // Wait for render then fit
+            setTimeout(fitPreviewToScreen, 50);
+        }
+
+        function syncCodeToCanvas() {
+            const code = document.getElementById('htmlInput').value;
             document.getElementById('flyer-canvas').innerHTML = code;
-            document.getElementById('htmlInput').value = code;
-            setTimeout(fitPreviewToScreen, 100); 
         }
 
         function addVariable() {
@@ -259,127 +523,275 @@
 
         function insertImage() {
             const url = document.getElementById('imgInput').value.trim();
-            if(!url) { showMsg("Info", "Masukkan link gambar terlebih dahulu!"); return; }
+            if(!url) { alert("Masukkan URL gambar!"); return; }
             const imgTag = `<img src="${url}" style="width:100%; max-width:200px; display:block; margin:10px auto; border-radius:8px;">`;
             insertAtCursor(imgTag);
             document.getElementById('imgInput').value = "";
         }
 
         function insertQR() {
-            insertAtCursor(`<div style="display:inline-block; background:#f3f4f6; color:#999; padding:20px; border:2px dashed #cbd5e1; font-size:10px;">{{QR_CODE}}</div>`);
+            insertAtCursor(`<div style="display:inline-block; background:#f8f9fa; color:#adb5bd; padding:15px; border:2px dashed #dee2e6; font-size:10px; text-align:center;">{{QR_CODE}}</div>`);
         }
 
         function insertAtCursor(text) {
-            const canvas = document.getElementById('flyer-canvas');
-            canvas.focus();
-            document.execCommand('insertHTML', false, text);
-            document.getElementById('htmlInput').value = canvas.innerHTML;
+            const input = document.getElementById('htmlInput');
+            const scrollPos = input.scrollTop;
+            const pos = input.selectionStart;
+            const front = input.value.substring(0, pos);
+            const back = input.value.substring(pos, input.value.length);
+            input.value = front + text + back;
+            input.selectionStart = pos + text.length;
+            input.selectionEnd = pos + text.length;
+            input.scrollTop = scrollPos;
+            syncCodeToCanvas();
         }
 
-        function syncCodeToCanvas() {
-            document.getElementById('flyer-canvas').innerHTML = document.getElementById('htmlInput').value;
-            setTimeout(fitPreviewToScreen, 100);
-        }
-
-        function saveTemplate(btn) {
-            const code = document.getElementById('flyer-canvas').innerHTML;
+        function saveTemplate() {
+            if(!API_URL) {
+                alert("Mode Offline: Template tersimpan di memori browser (sementara). Silakan copy HTML jika ingin menyimpan permanen.");
+                return;
+            }
+            const code = document.getElementById('htmlInput').value;
+            // Fetch ke API Google Script
+            const btn = document.querySelector('button[onclick="saveTemplate()"]');
             const originalText = btn.innerHTML;
-            btn.innerHTML = "⏳ Saving..."; btn.disabled = true;
-            fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "saveTemplate", payload: code }) })
-            .then(res => res.json()).then(() => { showMsg("Sukses", "Template disimpan!"); btn.innerHTML = originalText; btn.disabled = false; })
-            .catch(() => { showMsg("Terkirim", "Cek User Mode."); btn.innerHTML = originalText; btn.disabled = false; });
+            btn.innerHTML = 'Menyimpan...'; btn.disabled = true;
+
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: "saveTemplate", payload: code })
+            }).then(res => res.json()).then(data => {
+                alert("Template Berhasil Disimpan di Database!");
+                btn.innerHTML = originalText; btn.disabled = false;
+            }).catch(e => {
+                alert("Gagal menyimpan: " + e);
+                btn.innerHTML = originalText; btn.disabled = false;
+            });
         }
 
-        function handleEnter(e, type) { 
+        // --- USER FUNCTIONS ---
+
+        function initUser(htmlCode) {
+            generateForm(htmlCode);
+            updateContent();
+        }
+
+        function updateColor(color) {
+            document.getElementById('flyer-canvas').style.setProperty('--theme-color', color);
+        }
+
+        function generateForm(htmlCode) {
+            const container = document.getElementById('dynamic-form');
+            container.innerHTML = "";
+            const regex = /{{\s*([a-zA-Z0-9_]+)\s*}}/g;
+            let match;
+            const uniqueLabels = new Set();
+            let hasQR = false;
+
+            while ((match = regex.exec(htmlCode)) !== null) {
+                const label = match[1].trim();
+                if (label === 'QR_CODE') {
+                    hasQR = true;
+                } else if (!uniqueLabels.has(label)) {
+                    uniqueLabels.add(label);
+                    
+                    const div = document.createElement('div');
+                    div.className = 'mb-3';
+                    div.innerHTML = `
+                        <label class="form-label text-capitalize small fw-bold text-muted">${label.replace(/_/g, ' ')}</label>
+                        <input type="text" class="form-control" data-target="${label}" placeholder="Isi teks..." onkeyup="updateContent()">
+                    `;
+                    container.appendChild(div);
+                }
+            }
+
+            if (hasQR) {
+                const div = document.createElement('div');
+                div.className = 'mb-3 p-3 bg-light border rounded';
+                div.innerHTML = `
+                    <label class="form-label fw-bold small text-dark"><i class="bi bi-qr-code me-1"></i>Isi Konten QR Code</label>
+                    <input type="text" id="qrInput" class="form-control" placeholder="https://..." onkeyup="generateQR()">
+                `;
+                container.prepend(div);
+            }
+            
+            if(uniqueLabels.size === 0 && !hasQR) {
+                container.innerHTML = `<div class="alert alert-warning small">Tidak ada variabel dinamis ({{...}}) ditemukan di template ini.</div>`;
+            }
+        }
+
+        function updateContent() {
+            let currentHTML = RAW_TEMPLATE;
+            
+            // Replace Text Variables
+            document.querySelectorAll('#dynamic-form input:not(#qrInput)').forEach(input => {
+                const target = input.getAttribute('data-target');
+                const val = input.value || target; // If empty, show placeholder name
+                // Global replace using regex
+                const reg = new RegExp("{{\\s*" + target + "\\s*}}", "g");
+                currentHTML = currentHTML.replace(reg, val);
+            });
+
+            // Update Canvas
+            const canvas = document.getElementById('flyer-canvas');
+            // Kita perlu hati-hati agar tidak me-reset gambar QR jika sudah ada
+            // Trik: Simpan QR element lama jika ada
+            const oldQR = canvas.querySelector('#live-qr');
+            
+            canvas.innerHTML = currentHTML;
+            canvas.style.setProperty('--theme-color', document.getElementById('colorPicker').value);
+
+            // Re-inject QR if needed (karena innerHTML replace menghancurkan DOM)
+            if(document.getElementById('qrInput')?.value && oldQR) {
+                if(canvas.innerHTML.includes('{{QR_CODE}}')) {
+                    canvas.innerHTML = canvas.innerHTML.replace('{{QR_CODE}}', oldQR.outerHTML);
+                }
+            } else if (document.getElementById('qrInput')?.value) {
+                generateQR(); // Regenerate from scratch
+            }
+            
+            // Ensure any images inside preserve aspect ratio styling if missed
+            const imgs = canvas.getElementsByTagName('img');
+            for(let img of imgs) {
+               // Optional: force styling preservation
+            }
+        }
+
+        function generateQR() {
+            const text = document.getElementById('qrInput').value;
+            const canvas = document.getElementById('flyer-canvas');
+            
+            if (!text) {
+                // Restore placeholder if empty
+                if(canvas.innerHTML.includes('<img id="live-qr"')) {
+                    // This is tricky, easier to just run updateContent which resets to RAW_TEMPLATE containing {{QR_CODE}}
+                    updateContent();
+                }
+                return;
+            }
+
+            const dump = document.getElementById('qr-dump');
+            dump.innerHTML = "";
+            
+            // Generate QR in hidden div
+            new QRCode(dump, {
+                text: text,
+                width: 256,
+                height: 256,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            // Wait for canvas generation in hidden div
+            setTimeout(() => {
+                const imgQR = dump.querySelector('img');
+                if (imgQR) {
+                    const imgTag = `<img src="${imgQR.src}" id="live-qr" style="width:100%; display:block; height:auto;">`;
+                    
+                    if (canvas.innerHTML.includes('{{QR_CODE}}')) {
+                        canvas.innerHTML = canvas.innerHTML.replace('{{QR_CODE}}', imgTag);
+                    } else {
+                        // If already replaced, replace the image
+                        const existing = canvas.querySelector('#live-qr');
+                        if(existing) existing.src = imgQR.src;
+                    }
+                }
+            }, 50);
+        }
+
+        // --- EXPORT & UTILS ---
+
+        function downloadImage(filename) {
+            const element = document.getElementById('flyer-canvas');
+            const btn = document.getElementById('btnDownload');
+            if(btn) { btn.innerHTML = 'Rendering...'; btn.disabled = true; }
+
+            // Reset Transform temporarily for clean render
+            const originalTransform = element.style.transform;
+            element.style.transform = 'none';
+
+            html2canvas(element, {
+                scale: 3, // High Quality
+                useCORS: true, // Allow external images
+                backgroundColor: null
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = filename + '.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+                
+                // Restore UI
+                element.style.transform = originalTransform;
+                if(btn) { btn.innerHTML = '<i class="bi bi-download me-2"></i>Download Gambar'; btn.disabled = false; }
+            }).catch(err => {
+                alert("Error rendering image: " + err);
+                element.style.transform = originalTransform;
+                if(btn) { btn.innerHTML = '<i class="bi bi-download me-2"></i>Download Gambar'; btn.disabled = false; }
+            });
+        }
+
+        function downloadHTML(filename) {
+            const content = document.getElementById('flyer-canvas').innerHTML;
+            const fullHtml = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>${filename}</title></head>
+<body style="background:#f0f0f0; display:flex; justify-content:center; padding:40px;">
+    <div style="background:white; box-shadow:0 0 20px rgba(0,0,0,0.1);">
+        ${content}
+    </div>
+</body>
+</html>`;
+            const blob = new Blob([fullHtml], {type: 'text/html'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename + '.html';
+            link.click();
+        }
+
+        function handleEnter(e, type) {
             if(e.key === 'Enter') {
                 if(type === 'var') addVariable();
                 if(type === 'img') insertImage();
             }
         }
 
-        function initUser(template) {
-            document.getElementById('user-panel').classList.add('active-panel');
-            document.getElementById('role-badge').innerText = 'PUBLIK';
-            if(!template) { document.getElementById('flyer-canvas').innerHTML = "<div style='padding:50px; text-align:center'>Empty</div>"; return; }
-            RAW_TEMPLATE = template;
-            document.getElementById('flyer-canvas').innerHTML = RAW_TEMPLATE;
-            document.getElementById('flyer-canvas').style.setProperty('--theme-color', '#4f46e5');
-            generateForm(RAW_TEMPLATE);
-            setTimeout(fitPreviewToScreen, 100);
-        }
-
-        function updateColor(color) { document.getElementById('flyer-canvas').style.setProperty('--theme-color', color); }
-
-        function generateForm(htmlCode) {
-            const container = document.getElementById('dynamic-form'); container.innerHTML = "";
-            const regex = /{{\s*([a-zA-Z0-9_]+)\s*}}/g;
-            let match; const uniqueLabels = new Set(); let hasQR = false;
-            while ((match = regex.exec(htmlCode)) !== null) {
-                const label = match[1].trim();
-                if (label === 'QR_CODE') { hasQR = true; } 
-                else if(!uniqueLabels.has(label)) {
-                    uniqueLabels.add(label);
-                    const div = document.createElement('div'); div.className = 'form-group';
-                    div.innerHTML = `<label>${label.replace(/_/g, ' ')}</label><input type="text" class="form-input" data-target="${label}" placeholder="Isi..." onkeyup="updateContent()">`;
-                    container.appendChild(div);
-                }
-            }
-            if(hasQR) {
-                const div = document.createElement('div'); div.className = 'form-group'; div.style.background = "#fff1f2"; div.style.padding = "10px"; div.style.borderRadius = "6px"; div.style.border = "1px solid #fecdd3";
-                div.innerHTML = `<label style="color:#be123c"><i class="ph ph-qr-code"></i> Link QR Code</label><input type="text" id="qrInput" class="form-input" placeholder="https://..." onkeyup="generateQR()">`;
-                container.prepend(div);
-            }
-        }
-
-        function updateContent() {
-            let currentHTML = RAW_TEMPLATE;
-            document.querySelectorAll('#dynamic-form input:not(#qrInput)').forEach(input => {
-                const target = input.getAttribute('data-target');
-                const val = input.value || target;
-                currentHTML = currentHTML.replace(new RegExp("{{\\s*" + target + "\\s*}}", "g"), val);
-            });
+        /**
+         * Responsive Logic: Fit Flyer to Screen
+         * This scales the preview div so the whole flyer is visible regardless of screen size
+         */
+        function fitPreviewToScreen() {
+            const container = document.getElementById('preview-container');
             const canvas = document.getElementById('flyer-canvas');
-            canvas.innerHTML = currentHTML;
-            canvas.style.setProperty('--theme-color', document.getElementById('colorPicker').value);
-            if(document.getElementById('qrInput')?.value) generateQR();
-            fitPreviewToScreen();
+            
+            if (!canvas || !container) return;
+
+            // Reset transform to calculate natural dimensions
+            canvas.style.transform = 'none';
+            
+            const padding = 60; // Space around
+            const containerW = container.clientWidth - padding;
+            const containerH = container.clientHeight - padding;
+            const flyerW = canvas.offsetWidth;
+            const flyerH = canvas.offsetHeight;
+
+            if (flyerW === 0 || flyerH === 0) return;
+
+            const scaleX = containerW / flyerW;
+            const scaleY = containerH / flyerH;
+            
+            // Choose the smaller scale to fit entirely
+            let scale = Math.min(scaleX, scaleY);
+            
+            // Don't upscale if it already fits, unless it's very small
+            if (scale > 1) scale = 1;
+
+            canvas.style.transform = `scale(${scale})`;
         }
 
-        function generateQR() {
-            const text = document.getElementById('qrInput').value; if(!text) return;
-            const dump = document.getElementById('qr-generator-dump'); dump.innerHTML = "";
-            new QRCode(dump, { text: text, width: 256, height: 256, correctLevel: QRCode.CorrectLevel.H });
-            setTimeout(() => {
-                const imgQR = dump.querySelector('img');
-                if(imgQR) {
-                    const canvas = document.getElementById('flyer-canvas');
-                    if(canvas.innerHTML.includes('{{QR_CODE}}')) canvas.innerHTML = canvas.innerHTML.replace('{{QR_CODE}}', `<img src="${imgQR.src}" id="live-qr" style="width:100%; display:block;">`);
-                    else { const exist = canvas.querySelector('#live-qr'); if(exist) exist.src = imgQR.src; }
-                    canvas.style.setProperty('--theme-color', document.getElementById('colorPicker').value);
-                }
-            }, 50);
-        }
+        window.addEventListener('resize', fitPreviewToScreen);
 
-        function downloadImage(name) {
-            const el = document.getElementById("flyer-canvas");
-            const transform = el.style.transform; el.style.transform = 'none';
-            showMsg("Proses", "Merender gambar...");
-            html2canvas(el, { scale: 2, useCORS: true }).then(canvas => {
-                const link = document.createElement('a'); link.download = name + '.png'; link.href = canvas.toDataURL("image/png"); link.click();
-                el.style.transform = transform; document.getElementById('msgModal').style.display='none';
-            }).catch(() => { el.style.transform = transform; showMsg("Gagal", "Error render."); });
-        }
-
-        function downloadHTML(name) {
-            const content = document.getElementById("flyer-canvas").innerHTML;
-            const blob = new Blob([`<html><body style="display:flex;justify-content:center;background:#eee;padding:50px;"><div style="background:white;">${content}</div></body></html>`], {type: 'text/html'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name + '.html'; a.click();
-        }
-
-        function showMsg(title, desc) {
-            document.getElementById('mTitle').innerText = title; document.getElementById('mDesc').innerText = desc;
-            document.getElementById('msgModal').style.display = 'flex';
-        }
     </script>
 </body>
 </html>
