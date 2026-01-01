@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flyer Generator Pro (Bootstrap 5)</title>
+    <title>Flyer Generator Pro (Material You)</title>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,14 +20,23 @@
 
     <style>
         :root {
-            --primary-color: #4f46e5;
-            --sidebar-width: 400px;
-            --bg-canvas: #e9ecef;
+            /* Material You Inspired Colors */
+            --primary-color: #6750a4; /* M3 Purple */
+            --primary-container: #eaddff;
+            --on-primary-container: #21005d;
+            --surface-color: #fdfcff;
+            --surface-container: #f3f6fc;
+            --outline-color: #79747e;
+            --sidebar-width: 420px;
+            --border-radius-lg: 28px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 8px;
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-canvas);
+            background-color: var(--surface-container);
+            color: #1c1b1f;
             height: 100vh;
             overflow: hidden;
             margin: 0;
@@ -40,35 +49,38 @@
             width: 100%;
         }
 
-        /* Sidebar Styling */
+        /* Material You Sidebar */
         .sidebar {
             width: var(--sidebar-width);
-            background: white;
+            background: var(--surface-color);
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #dee2e6;
+            border-right: none;
             flex-shrink: 0;
             z-index: 100;
-            box-shadow: 4px 0 24px rgba(0,0,0,0.05);
+            box-shadow: 2px 0 0 rgba(0,0,0,0.02);
             transition: margin 0.3s ease;
         }
 
         .sidebar-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #f1f3f5;
-            background: rgba(255,255,255,0.95);
+            padding: 1.5rem 2rem;
+            background: var(--surface-color);
         }
 
         .sidebar-content {
             flex: 1;
             overflow-y: auto;
-            padding: 1.5rem;
+            padding: 0 2rem 2rem 2rem;
+            scrollbar-width: thin;
         }
+        
+        .sidebar-content::-webkit-scrollbar { width: 6px; }
+        .sidebar-content::-webkit-scrollbar-thumb { background-color: #e0e0e0; border-radius: 10px; }
 
         .sidebar-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #f1f3f5;
-            background: #f8f9fa;
+            padding: 1.5rem 2rem;
+            background: var(--surface-container);
+            border-top: 1px solid rgba(0,0,0,0.05);
         }
 
         /* Main Preview Area */
@@ -78,6 +90,11 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg);
+            background-color: #ffffff;
+            margin: 10px 10px 10px 0;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .preview-area {
@@ -87,73 +104,162 @@
             justify-content: center;
             overflow: auto;
             padding: 40px;
-            background-image: radial-gradient(#ced4da 1px, transparent 1px);
-            background-size: 20px 20px;
+            background-image: radial-gradient(#e0e0e0 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg);
+        }
+
+        /* Material Components Overrides */
+        
+        /* Buttons */
+        .btn {
+            border-radius: 100px; /* Pill shape */
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: 0.3px;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #55418b;
+            border-color: #55418b;
+            box-shadow: 0 4px 8px rgba(103, 80, 164, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-secondary {
+            border-color: #79747e;
+            color: #49454f;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #f0f0f0;
+            color: #1d1b20;
+            border-color: #1d1b20;
+        }
+
+        /* Inputs */
+        .form-control {
+            border-radius: var(--border-radius-md);
+            background-color: #f0f4f8; /* Surface Variant */
+            border: 2px solid transparent;
+            padding: 0.85rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            background-color: #ffffff;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--primary-container);
+        }
+
+        .input-group .btn {
+            border-top-right-radius: var(--border-radius-md) !important;
+            border-bottom-right-radius: var(--border-radius-md) !important;
+            z-index: 5;
+        }
+        
+        .input-group .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        /* Preset Cards */
+        .btn-preset {
+            height: 100px;
+            border-radius: var(--border-radius-md);
+            background-color: var(--surface-container);
+            border: 1px solid transparent;
+            color: #49454f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .btn-preset:hover, .btn-preset.active {
+            background-color: var(--primary-container);
+            color: var(--on-primary-container);
+            border-color: transparent;
+        }
+        
+        .btn-preset i { font-size: 1.75rem; }
+
+        /* Color Picker */
+        .form-control-color {
+            width: 100%;
+            height: 50px;
+            border-radius: var(--border-radius-md);
+            padding: 0.5rem;
+            border: none;
+            background-color: #f0f4f8;
+            cursor: pointer;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.5em 1em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Code Editor */
+        .code-editor {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            width: 100%;
+            min-height: 250px;
+            line-height: 1.5;
         }
 
         /* The Flyer Canvas */
         #flyer-canvas {
             background: white;
-            box-shadow: 0 20px 50px -12px rgba(0,0,0,0.25);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.15);
             margin: auto;
-            transform-origin: center center; /* Changed from top center for better centering */
+            transform-origin: center center;
             transition: transform 0.2s ease;
-            /* Default size to prevent collapse before content loads */
             min-width: 400px; 
             min-height: 400px;
         }
 
-        /* Custom UI Elements */
-        .code-editor {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            background-color: #212529;
-            color: #f8f9fa;
-            border: none;
-            border-radius: 8px;
-            padding: 15px;
-            resize: none;
-            width: 100%;
-            min-height: 200px;
-        }
-
-        .btn-preset {
-            height: 80px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            border: 1px solid #dee2e6;
-            background: #fff;
-            color: #6c757d;
-            transition: all 0.2s;
-        }
-        
-        .btn-preset:hover {
-            border-color: var(--primary-color);
-            background-color: #eef2ff;
-            color: var(--primary-color);
-        }
-
-        .panel { display: none; }
+        .panel { display: none; animation: fadeIn 0.3s ease; }
         .panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Loader */
         #loader {
             position: fixed; top:0; left:0; right:0; bottom:0;
-            background: white; z-index: 9999;
+            background: var(--surface-color); z-index: 9999;
             display: flex; justify-content: center; align-items: center; flex-direction: column;
         }
 
         /* Mobile Responsive */
         @media (max-width: 992px) {
-            body { height: auto; overflow: auto; }
+            body { height: auto; overflow: auto; background: var(--surface-color); }
             .wrapper { flex-direction: column-reverse; height: auto; }
-            .sidebar { width: 100%; height: auto; border-right: none; border-top: 1px solid #dee2e6; }
-            .main-content { height: 60vh; min-height: 400px; }
-            .preview-area { align-items: flex-start; padding-top: 20px; }
-            #flyer-canvas { transform-origin: top center; margin-top: 20px; }
+            .sidebar { width: 100%; height: auto; border-right: none; padding-bottom: 80px; }
+            .main-content { 
+                height: 60vh; min-height: 400px; 
+                margin: 0; border-radius: 0 0 24px 24px;
+                border: none; box-shadow: none; border-bottom: 1px solid #eee;
+            }
+            .preview-area { border-radius: 0; align-items: flex-start; padding-top: 30px; }
+            #flyer-canvas { transform-origin: top center; margin-top: 10px; }
         }
     </style>
 </head>
@@ -161,8 +267,8 @@
 
     <!-- Loading Screen -->
     <div id="loader">
-        <div class="spinner-border text-primary mb-3" role="status"></div>
-        <div class="text-muted fw-bold small">Memuat Aplikasi...</div>
+        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+        <div class="text-dark fw-bold" style="letter-spacing: 1px;">MEMUAT APLIKASI...</div>
     </div>
 
     <!-- Hidden div for QR Generation -->
@@ -173,78 +279,78 @@
         <aside class="sidebar">
             <div class="sidebar-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-layers-fill text-primary me-2"></i>FlyerPro</h5>
-                    <small class="text-muted" style="font-size: 11px;">Single File v1.0</small>
+                    <h4 class="mb-0 fw-bold" style="color: var(--primary-color);"><i class="bi bi-palette2 me-2"></i>FlyerPro</h4>
+                    <small class="text-muted fw-semibold" style="letter-spacing: 0.5px;">MATERIAL EDITION</small>
                 </div>
-                <span class="badge rounded-pill bg-primary" id="role-badge">USER</span>
+                <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle" id="role-badge">USER</span>
             </div>
 
             <div class="sidebar-content">
                 
-                <!-- ADMIN PANEL -->
-                <div id="admin-panel" class="panel">
-                    <div class="mb-4">
-                        <label class="form-label text-uppercase fw-bold text-muted small" style="font-size: 0.75rem;">1. Pilih Template</label>
-                        <div class="row g-2">
+                <!-- CREATOR PANEL (Renamed from Admin) -->
+                <div id="creator-panel" class="panel">
+                    <div class="mb-5">
+                        <label class="d-block text-secondary fw-bold mb-3 small" style="letter-spacing:1px;">1. PILIH TEMPLATE</label>
+                        <div class="row g-3">
                             <div class="col-4">
-                                <button class="btn btn-preset w-100 rounded-3" onclick="loadPreset('promo')">
-                                    <i class="bi bi-shop fs-4"></i>
-                                    <span style="font-size: 10px;">Promo</span>
+                                <button class="btn btn-preset w-100" onclick="loadPreset('promo')">
+                                    <i class="bi bi-bag-check-fill text-primary"></i>
+                                    <span class="fw-bold small">Promo</span>
                                 </button>
                             </div>
                             <div class="col-4">
-                                <button class="btn btn-preset w-100 rounded-3" onclick="loadPreset('event')">
-                                    <i class="bi bi-calendar-event fs-4"></i>
-                                    <span style="font-size: 10px;">Event</span>
+                                <button class="btn btn-preset w-100" onclick="loadPreset('event')">
+                                    <i class="bi bi-calendar2-event-fill text-danger"></i>
+                                    <span class="fw-bold small">Event</span>
                                 </button>
                             </div>
                             <div class="col-4">
-                                <button class="btn btn-preset w-100 rounded-3" onclick="loadPreset('cert')">
-                                    <i class="bi bi-award fs-4"></i>
-                                    <span style="font-size: 10px;">Sertifikat</span>
+                                <button class="btn btn-preset w-100" onclick="loadPreset('cert')">
+                                    <i class="bi bi-patch-check-fill text-warning"></i>
+                                    <span class="fw-bold small">Sertif</span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label text-uppercase fw-bold text-muted small" style="font-size: 0.75rem;">2. Tools Editor</label>
+                    <div class="mb-5">
+                        <label class="d-block text-secondary fw-bold mb-3 small" style="letter-spacing:1px;">2. TOOLS CREATOR</label>
                         
                         <!-- Add Text Variable -->
-                        <div class="input-group input-group-sm mb-2">
+                        <div class="input-group mb-3">
                             <input type="text" id="varInput" class="form-control" placeholder="Label (ex: HARGA)" onkeypress="handleEnter(event, 'var')">
-                            <button class="btn btn-outline-secondary" type="button" onclick="addVariable()">
+                            <button class="btn btn-outline-secondary px-3" type="button" onclick="addVariable()">
                                 <i class="bi bi-plus-lg"></i> Teks
                             </button>
                         </div>
 
                         <!-- Add Image -->
-                        <div class="input-group input-group-sm mb-2">
+                        <div class="input-group mb-3">
                             <input type="text" id="imgInput" class="form-control" placeholder="URL Gambar..." onkeypress="handleEnter(event, 'img')">
-                            <button class="btn btn-outline-secondary" type="button" onclick="insertImage()">
+                            <button class="btn btn-outline-secondary px-3" type="button" onclick="insertImage()">
                                 <i class="bi bi-image"></i> Img
                             </button>
                         </div>
 
                         <!-- Add QR -->
-                        <button class="btn btn-sm btn-outline-dark w-100 border-dashed" onclick="insertQR()">
-                            <i class="bi bi-qr-code me-1"></i> Sisipkan Placeholder QR Code
+                        <button class="btn btn-light w-100 border text-muted py-3 rounded-4" onclick="insertQR()" style="border-style: dashed !important;">
+                            <i class="bi bi-qr-code me-2"></i> Sisipkan Placeholder QR Code
                         </button>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-uppercase fw-bold text-muted small" style="font-size: 0.75rem;">3. Source Code HTML</label>
+                    <div class="mb-4">
+                        <label class="d-block text-secondary fw-bold mb-3 small" style="letter-spacing:1px;">3. SOURCE CODE</label>
                         <textarea id="htmlInput" class="code-editor form-control" spellcheck="false" oninput="syncCodeToCanvas()"></textarea>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button class="btn btn-success fw-bold" onclick="saveTemplate()"><i class="bi bi-save me-2"></i>Simpan Template</button>
+                        <button class="btn btn-primary btn-lg" onclick="saveTemplate()"><i class="bi bi-cloud-arrow-up-fill me-2"></i>Simpan Template</button>
                         <div class="row g-2">
                             <div class="col-6">
-                                <button class="btn btn-outline-secondary w-100 btn-sm" onclick="downloadHTML('Admin_Template')">Download HTML</button>
+                                <button class="btn btn-outline-secondary w-100 btn-sm" onclick="downloadHTML('Creator_Template')">Export HTML</button>
                             </div>
                             <div class="col-6">
-                                <button class="btn btn-outline-secondary w-100 btn-sm" onclick="downloadImage('Master_Design')">Download PNG</button>
+                                <button class="btn btn-outline-secondary w-100 btn-sm" onclick="downloadImage('Master_Design')">Export PNG</button>
                             </div>
                         </div>
                     </div>
@@ -252,35 +358,39 @@
 
                 <!-- USER PANEL -->
                 <div id="user-panel" class="panel active">
-                    <div class="alert alert-primary bg-primary-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3">
-                        <i class="bi bi-info-circle-fill text-primary me-3 fs-3"></i>
-                        <div>
-                            <h6 class="fw-bold mb-0 text-primary">Kustomisasi</h6>
-                            <small class="text-primary-emphasis">Isi form di bawah untuk mengubah desain secara otomatis.</small>
+                    <div class="card border-0 bg-primary-subtle mb-4" style="border-radius: 20px;">
+                        <div class="card-body d-flex align-items-center p-4">
+                            <div class="bg-white rounded-circle p-2 d-flex align-items-center justify-content-center me-3 text-primary shadow-sm" style="width:48px; height:48px;">
+                                <i class="bi bi-pencil-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1 text-primary-emphasis">Kustomisasi Desain</h6>
+                                <p class="mb-0 small text-muted" style="line-height: 1.3;">Ubah data di bawah untuk melihat hasil secara instan.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">Warna Tema</label>
-                        <input type="color" class="form-control form-control-color w-100" id="colorPicker" value="#4f46e5" title="Choose your color" oninput="updateColor(this.value)">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-secondary">WARNA TEMA</label>
+                        <input type="color" class="form-control form-control-color" id="colorPicker" value="#6750a4" title="Choose your color" oninput="updateColor(this.value)">
                     </div>
 
                     <div id="dynamic-form">
                         <!-- Inputs will be generated here -->
-                        <div class="text-center text-muted py-4">
-                            <div class="spinner-border spinner-border-sm mb-2"></div>
+                        <div class="text-center text-muted py-5">
+                            <div class="spinner-border spinner-border-sm mb-2 text-secondary"></div>
                             <p class="small">Memuat form...</p>
                         </div>
                     </div>
 
-                    <hr class="my-4">
+                    <hr class="my-5 border-secondary-subtle">
 
-                    <div class="d-grid gap-2">
-                        <button id="btnDownload" class="btn btn-primary btn-lg fw-bold shadow-sm" onclick="downloadImage('Flyer_Final')">
-                            <i class="bi bi-download me-2"></i>Download Gambar
+                    <div class="d-grid gap-3">
+                        <button id="btnDownload" class="btn btn-primary btn-lg py-3 shadow-sm" onclick="downloadImage('Flyer_Final')">
+                            <i class="bi bi-download me-2"></i>Download Gambar (FHD)
                         </button>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="downloadHTML('Flyer_Saya')">
-                            <i class="bi bi-filetype-html me-2"></i>Simpan sebagai HTML
+                        <button class="btn btn-outline-secondary" onclick="downloadHTML('Flyer_Saya')">
+                            <i class="bi bi-filetype-html me-2"></i>Simpan sebagai File
                         </button>
                     </div>
                 </div>
@@ -289,11 +399,10 @@
 
             <!-- Footer / Switcher -->
             <div class="sidebar-footer d-flex justify-content-between align-items-center">
-                <small class="text-muted">&copy; 2023 FlyerPro</small>
-                <div class="form-check form-switch">
-                    <!-- Updated onchange to handle PIN logic -->
-                    <input class="form-check-input" type="checkbox" id="modeSwitch" onchange="handleModeSwitch(this)">
-                    <label class="form-check-label small fw-bold" for="modeSwitch">Admin Mode</label>
+                <small class="text-muted fw-medium">&copy; 2026 onelabszz</small>
+                <div class="form-check form-switch d-flex align-items-center gap-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="modeSwitch" onchange="handleModeSwitch(this)" style="width: 3em; height: 1.5em; cursor: pointer;">
+                    <label class="form-check-label small fw-bold text-secondary" for="modeSwitch">Creator Mode</label>
                 </div>
             </div>
         </aside>
@@ -309,24 +418,30 @@
     <!-- PIN Modal -->
     <div class="modal fade" id="pinModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <h6 class="modal-title fw-bold">Akses Admin</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+                <div class="modal-header border-0 pb-0 justify-content-center pt-4">
+                    <h6 class="modal-title fw-bold text-center w-100">Akses Creator</h6>
                 </div>
-                <div class="modal-body">
-                    <p class="small text-muted mb-2">Masukkan PIN (Default: 1234)</p>
-                    <input type="password" id="adminPinInput" class="form-control text-center text-primary fw-bold fs-4" maxlength="6" inputmode="numeric">
-                    <div id="pinError" class="text-danger small mt-2 text-center fw-bold" style="display:none;">PIN Salah!</div>
+                <div class="modal-body text-center px-4">
+                    <p class="small text-muted mb-3">Masukkan PIN keamanan untuk masuk ke mode editor.</p>
+                    <input type="password" id="adminPinInput" class="form-control text-center text-primary fw-bold fs-3 mb-3" maxlength="6" inputmode="numeric" style="letter-spacing: 5px;">
+                    <div id="pinError" class="text-danger small fw-bold animate__animated animate__shakeX" style="display:none;">PIN Salah!</div>
                 </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-primary w-100" onclick="verifyPin()">Masuk</button>
+                <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                    <div class="row w-100 g-2">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">Batal</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-primary w-100" onclick="verifyPin()">Masuk</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS (Optional for Modals, but kept clean mostly) -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Main Logic -->
@@ -334,12 +449,12 @@
         /**
          * GLOBAL CONFIGURATION
          */
-        // URL Google Script Anda (Opsional: Jika kosong, hanya berjalan di memori browser lokal)
-        const API_URL = "https://script.google.com/macros/s/AKfycbzEd4YG1VlOFcbgVip6XrOe4quWAImkvcOvzVerTYavMkiuU1F6nSmoxd56b7DbEw7W/exec"; 
+        // URL Google Script Anda (Opsional)
+        const API_URL = ""; 
         
         let RAW_TEMPLATE = "";
-        let CURRENT_MODE = 'user'; // 'user' or 'admin'
-        let ADMIN_PIN = "1234"; // Default PIN
+        let CURRENT_MODE = 'user'; // 'user' or 'creator'
+        let CREATOR_PIN = "1234"; // Default PIN
 
         // Preset Templates (HTML Strings)
         const PRESETS = {
@@ -423,17 +538,16 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const modeParam = urlParams.get('mode');
                 
-                // Cek API jika ada, jika tidak gunakan local mode
                 if(API_URL) {
                     fetch(API_URL + "?action=getSettings")
                         .then(res => res.json())
                         .then(data => {
                             if(data.PasscodeAdmin) {
-                                ADMIN_PIN = data.PasscodeAdmin;
+                                CREATOR_PIN = data.PasscodeAdmin;
                             }
                             if (modeParam && modeParam === data.PasscodeAdmin) {
                                 document.getElementById('modeSwitch').checked = true;
-                                toggleMode(true); // Masuk Admin bypass via URL
+                                toggleMode(true);
                                 if(data.TemplateAktif) loadHtmlToCanvas(data.TemplateAktif);
                                 else loadPreset('promo');
                             } else {
@@ -448,14 +562,13 @@
                             useLocalDefault();
                         });
                 } else {
-                    // Local Mode Default
                     useLocalDefault();
                 }
-            }, 800); // Fake loading delay for smooth UX
+            }, 800);
         };
 
         function useLocalDefault() {
-            loadPreset('promo'); // Default load
+            loadPreset('promo');
             finishLoading();
         }
 
@@ -466,83 +579,64 @@
 
         function handleModeSwitch(checkbox) {
             if (checkbox.checked) {
-                // User wants admin, uncheck first until PIN verified
-                checkbox.checked = false;
-                
-                // Open PIN Modal
+                checkbox.checked = false; // Wait for PIN
                 const pinModalEl = document.getElementById('pinModal');
                 const modal = new bootstrap.Modal(pinModalEl);
-                
-                // Reset State
                 document.getElementById('adminPinInput').value = '';
                 document.getElementById('pinError').style.display = 'none';
-                
                 modal.show();
-
-                // Focus Input
                 pinModalEl.addEventListener('shown.bs.modal', function () {
                     document.getElementById('adminPinInput').focus();
                 }, {once:true});
             } else {
-                // User wants to exit admin
                 toggleMode(false);
             }
         }
 
         function verifyPin() {
             const input = document.getElementById('adminPinInput').value;
-            if (input === ADMIN_PIN) {
-                // Success
+            if (input === CREATOR_PIN) {
                 const el = document.getElementById('pinModal');
                 const modal = bootstrap.Modal.getInstance(el);
                 modal.hide();
-                
-                // Visual Check & Logic
                 document.getElementById('modeSwitch').checked = true;
                 toggleMode(true);
             } else {
-                // Fail
                 const err = document.getElementById('pinError');
                 err.style.display = 'block';
                 err.innerText = "PIN Salah! Silakan coba lagi.";
-                
                 const inputEl = document.getElementById('adminPinInput');
                 inputEl.value = '';
                 inputEl.focus();
             }
         }
 
-        // Allow Enter key on PIN input
         document.getElementById('adminPinInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') verifyPin();
         });
 
-        function toggleMode(isAdmin) {
-            const adminPanel = document.getElementById('admin-panel');
+        function toggleMode(isCreator) {
+            const creatorPanel = document.getElementById('creator-panel');
             const userPanel = document.getElementById('user-panel');
             const roleBadge = document.getElementById('role-badge');
             
-            // Note: modeSwitch.checked is handled by UI or verifyPin logic now
-
-            if (isAdmin) {
-                CURRENT_MODE = 'admin';
-                adminPanel.classList.add('active');
+            if (isCreator) {
+                CURRENT_MODE = 'creator';
+                creatorPanel.classList.add('active');
                 userPanel.classList.remove('active');
-                roleBadge.className = 'badge rounded-pill bg-danger';
-                roleBadge.innerText = 'ADMIN';
+                roleBadge.className = 'badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle';
+                roleBadge.innerText = 'CREATOR';
                 
-                // Sync current canvas to editor
                 const currentHtml = document.getElementById('flyer-canvas').innerHTML;
                 document.getElementById('htmlInput').value = currentHtml;
                 makeCanvasEditable(true);
             } else {
                 CURRENT_MODE = 'user';
-                adminPanel.classList.remove('active');
+                creatorPanel.classList.remove('active');
                 userPanel.classList.add('active');
-                roleBadge.className = 'badge rounded-pill bg-primary';
+                roleBadge.className = 'badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle';
                 roleBadge.innerText = 'USER';
 
-                // Save whatever was in admin to RAW_TEMPLATE and init user form
                 RAW_TEMPLATE = document.getElementById('htmlInput').value || document.getElementById('flyer-canvas').innerHTML;
                 initUser(RAW_TEMPLATE);
                 makeCanvasEditable(false);
@@ -553,7 +647,6 @@
             const canvas = document.getElementById('flyer-canvas');
             if(isEditable) {
                 canvas.setAttribute('contenteditable', 'true');
-                // Add listener to sync back to textarea
                 canvas.oninput = function() {
                     document.getElementById('htmlInput').value = canvas.innerHTML;
                 };
@@ -563,7 +656,7 @@
             }
         }
 
-        // --- ADMIN FUNCTIONS ---
+        // --- CREATOR FUNCTIONS ---
 
         function loadPreset(type) {
             const code = PRESETS[type];
@@ -573,17 +666,14 @@
         function loadHtmlToCanvas(html) {
             const canvas = document.getElementById('flyer-canvas');
             canvas.innerHTML = html;
-            // Set default variable for color if exists
             canvas.style.setProperty('--theme-color', document.getElementById('colorPicker').value);
             
-            if(CURRENT_MODE === 'admin') {
+            if(CURRENT_MODE === 'creator') {
                 document.getElementById('htmlInput').value = html;
             } else {
                 RAW_TEMPLATE = html;
                 initUser(html);
             }
-            
-            // Wait for render then fit
             setTimeout(fitPreviewToScreen, 50);
         }
 
@@ -626,11 +716,10 @@
 
         function saveTemplate() {
             if(!API_URL) {
-                alert("Mode Offline: Template tersimpan di memori browser (sementara). Silakan copy HTML jika ingin menyimpan permanen.");
+                alert("Mode Offline: Template tersimpan di memori browser (sementara).");
                 return;
             }
             const code = document.getElementById('htmlInput').value;
-            // Fetch ke API Google Script
             const btn = document.querySelector('button[onclick="saveTemplate()"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = 'Menyimpan...'; btn.disabled = true;
@@ -639,7 +728,7 @@
                 method: 'POST',
                 body: JSON.stringify({ action: "saveTemplate", payload: code })
             }).then(res => res.json()).then(data => {
-                alert("Template Berhasil Disimpan di Database!");
+                alert("Template Berhasil Disimpan!");
                 btn.innerHTML = originalText; btn.disabled = false;
             }).catch(e => {
                 alert("Gagal menyimpan: " + e);
@@ -674,10 +763,10 @@
                     uniqueLabels.add(label);
                     
                     const div = document.createElement('div');
-                    div.className = 'mb-3';
+                    div.className = 'mb-4';
                     div.innerHTML = `
-                        <label class="form-label text-capitalize small fw-bold text-muted">${label.replace(/_/g, ' ')}</label>
-                        <input type="text" class="form-control" data-target="${label}" placeholder="Isi teks..." onkeyup="updateContent()">
+                        <label class="form-label text-capitalize fw-bold text-secondary small">${label.replace(/_/g, ' ')}</label>
+                        <input type="text" class="form-control" data-target="${label}" placeholder="Ketik disini..." onkeyup="updateContent()">
                     `;
                     container.appendChild(div);
                 }
@@ -685,7 +774,7 @@
 
             if (hasQR) {
                 const div = document.createElement('div');
-                div.className = 'mb-3 p-3 bg-light border rounded';
+                div.className = 'mb-4 p-3 bg-white border border-light rounded-4 shadow-sm';
                 div.innerHTML = `
                     <label class="form-label fw-bold small text-dark"><i class="bi bi-qr-code me-1"></i>Isi Konten QR Code</label>
                     <input type="text" id="qrInput" class="form-control" placeholder="https://..." onkeyup="generateQR()">
@@ -694,44 +783,31 @@
             }
             
             if(uniqueLabels.size === 0 && !hasQR) {
-                container.innerHTML = `<div class="alert alert-warning small">Tidak ada variabel dinamis ({{...}}) ditemukan di template ini.</div>`;
+                container.innerHTML = `<div class="alert alert-info border-0 bg-info-subtle small"><i class="bi bi-info-circle me-2"></i>Tidak ada input dinamis ditemukan.</div>`;
             }
         }
 
         function updateContent() {
             let currentHTML = RAW_TEMPLATE;
-            
-            // Replace Text Variables
             document.querySelectorAll('#dynamic-form input:not(#qrInput)').forEach(input => {
                 const target = input.getAttribute('data-target');
-                const val = input.value || target; // If empty, show placeholder name
-                // Global replace using regex
+                const val = input.value || target;
                 const reg = new RegExp("{{\\s*" + target + "\\s*}}", "g");
                 currentHTML = currentHTML.replace(reg, val);
             });
 
-            // Update Canvas
             const canvas = document.getElementById('flyer-canvas');
-            // Kita perlu hati-hati agar tidak me-reset gambar QR jika sudah ada
-            // Trik: Simpan QR element lama jika ada
             const oldQR = canvas.querySelector('#live-qr');
             
             canvas.innerHTML = currentHTML;
             canvas.style.setProperty('--theme-color', document.getElementById('colorPicker').value);
 
-            // Re-inject QR if needed (karena innerHTML replace menghancurkan DOM)
             if(document.getElementById('qrInput')?.value && oldQR) {
                 if(canvas.innerHTML.includes('{{QR_CODE}}')) {
                     canvas.innerHTML = canvas.innerHTML.replace('{{QR_CODE}}', oldQR.outerHTML);
                 }
             } else if (document.getElementById('qrInput')?.value) {
-                generateQR(); // Regenerate from scratch
-            }
-            
-            // Ensure any images inside preserve aspect ratio styling if missed
-            const imgs = canvas.getElementsByTagName('img');
-            for(let img of imgs) {
-               // Optional: force styling preservation
+                generateQR();
             }
         }
 
@@ -740,9 +816,7 @@
             const canvas = document.getElementById('flyer-canvas');
             
             if (!text) {
-                // Restore placeholder if empty
                 if(canvas.innerHTML.includes('<img id="live-qr"')) {
-                    // This is tricky, easier to just run updateContent which resets to RAW_TEMPLATE containing {{QR_CODE}}
                     updateContent();
                 }
                 return;
@@ -750,27 +824,22 @@
 
             const dump = document.getElementById('qr-dump');
             dump.innerHTML = "";
-            
-            // Generate QR in hidden div
             new QRCode(dump, {
                 text: text,
-                width: 256,
-                height: 256,
+                width: 512, // Higher res QR for FHD
+                height: 512,
                 colorDark : "#000000",
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.H
             });
 
-            // Wait for canvas generation in hidden div
             setTimeout(() => {
                 const imgQR = dump.querySelector('img');
                 if (imgQR) {
                     const imgTag = `<img src="${imgQR.src}" id="live-qr" style="width:100%; display:block; height:auto;">`;
-                    
                     if (canvas.innerHTML.includes('{{QR_CODE}}')) {
                         canvas.innerHTML = canvas.innerHTML.replace('{{QR_CODE}}', imgTag);
                     } else {
-                        // If already replaced, replace the image
                         const existing = canvas.querySelector('#live-qr');
                         if(existing) existing.src = imgQR.src;
                     }
@@ -783,15 +852,17 @@
         function downloadImage(filename) {
             const element = document.getElementById('flyer-canvas');
             const btn = document.getElementById('btnDownload');
-            if(btn) { btn.innerHTML = 'Rendering...'; btn.disabled = true; }
+            if(btn) { btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Rendering...'; btn.disabled = true; }
 
-            // Reset Transform temporarily for clean render
             const originalTransform = element.style.transform;
             element.style.transform = 'none';
 
+            // Scale factor: If flyer is small (e.g. 400px), scale 5x = 2000px width (FHD+ quality)
+            const scale = 5; 
+
             html2canvas(element, {
-                scale: 3, // High Quality
-                useCORS: true, // Allow external images
+                scale: scale,
+                useCORS: true,
                 backgroundColor: null
             }).then(canvas => {
                 const link = document.createElement('a');
@@ -799,28 +870,18 @@
                 link.href = canvas.toDataURL("image/png");
                 link.click();
                 
-                // Restore UI
                 element.style.transform = originalTransform;
-                if(btn) { btn.innerHTML = '<i class="bi bi-download me-2"></i>Download Gambar'; btn.disabled = false; }
+                if(btn) { btn.innerHTML = '<i class="bi bi-download me-2"></i>Download Gambar (FHD)'; btn.disabled = false; }
             }).catch(err => {
                 alert("Error rendering image: " + err);
                 element.style.transform = originalTransform;
-                if(btn) { btn.innerHTML = '<i class="bi bi-download me-2"></i>Download Gambar'; btn.disabled = false; }
+                if(btn) { btn.innerHTML = '<i class="bi bi-download me-2"></i>Download Gambar (FHD)'; btn.disabled = false; }
             });
         }
 
         function downloadHTML(filename) {
             const content = document.getElementById('flyer-canvas').innerHTML;
-            const fullHtml = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>${filename}</title></head>
-<body style="background:#f0f0f0; display:flex; justify-content:center; padding:40px;">
-    <div style="background:white; box-shadow:0 0 20px rgba(0,0,0,0.1);">
-        ${content}
-    </div>
-</body>
-</html>`;
+            const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${filename}</title></head><body style="background:#f0f0f0;display:flex;justify-content:center;padding:40px;"><div style="background:white;box-shadow:0 0 20px rgba(0,0,0,0.1);">${content}</div></body></html>`;
             const blob = new Blob([fullHtml], {type: 'text/html'});
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -835,36 +896,21 @@
             }
         }
 
-        /**
-         * Responsive Logic: Fit Flyer to Screen
-         * This scales the preview div so the whole flyer is visible regardless of screen size
-         */
         function fitPreviewToScreen() {
             const container = document.getElementById('preview-container');
             const canvas = document.getElementById('flyer-canvas');
-            
             if (!canvas || !container) return;
-
-            // Reset transform to calculate natural dimensions
             canvas.style.transform = 'none';
-            
-            const padding = 60; // Space around
+            const padding = 60;
             const containerW = container.clientWidth - padding;
             const containerH = container.clientHeight - padding;
             const flyerW = canvas.offsetWidth;
             const flyerH = canvas.offsetHeight;
-
             if (flyerW === 0 || flyerH === 0) return;
-
             const scaleX = containerW / flyerW;
             const scaleY = containerH / flyerH;
-            
-            // Choose the smaller scale to fit entirely
             let scale = Math.min(scaleX, scaleY);
-            
-            // Don't upscale if it already fits, unless it's very small
             if (scale > 1) scale = 1;
-
             canvas.style.transform = `scale(${scale})`;
         }
 
